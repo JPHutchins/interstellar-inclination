@@ -1,0 +1,35 @@
+---
+import Blog from "@layouts/blog";
+import Date from "@components/utilities/Date";
+import { published, getRSS } from "@data/post";
+import { MarkdownInstance } from "astro";
+
+export async function getStaticPaths({ rss }) {
+    const postsArray = (await Promise.all(
+        Object.values(import.meta.glob("../content/**/*.md")).map((fn) => fn())
+    )) as MarkdownInstance<any>[];
+
+    // rss(getRSS(postsArray));
+
+    return published(postsArray).map((post) => {
+        return {
+            params: { post: post.slug },
+            props: { post },
+        };
+    });
+}
+
+const { post } = Astro.props;
+---
+
+<Blog title={post.title}>
+    <div class="post-header container">
+        <h1 class="post-title">{post.title}</h1>
+        <div class="post-date">
+            <Date date={post.date} />
+        </div>
+    </div>
+    <div class="content container">
+        <post.Content />
+    </div>
+</Blog>

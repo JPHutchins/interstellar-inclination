@@ -9,7 +9,8 @@
         "astro": "astro"
     },
     "dependencies": {
-        "astro": "^5.1.7"
+        "astro": "^5.1.7",
+        "sass-embedded": "^1.83.4"
     },
     "prettier": {
         "printWidth": 100,

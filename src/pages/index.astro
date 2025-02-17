@@ -1,23 +1,21 @@
 ---
-import "../styles/global.css";
-import Footer from "../components/Footer.astro";
-import Header from "../components/Header.astro";
+import { published } from "@data/post";
+import Blog from "@layouts/blog";
+import Preview from "@components/blog/preview";
+import { MarkdownInstance } from "astro";
+
+const posts = published(
+    (await Promise.all(
+        Object.values(import.meta.glob("../content/**/*.md")).map((fn) => fn())
+    )) as MarkdownInstance<any>[]
+);
 ---
 
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <meta name="viewport" content="width=device-width" />
-        <meta name="generator" content={Astro.generator} />
-        <title>Astro</title>
-    </head>
-    <body>
-        <Header />
-        <h1>My Astro Site</h1>
-        <Footer />
-        <script>
-            import "../scripts/menu.js";
-        </script>
-    </body>
-</html>
+<Blog title="Crumped Paper">
+    <div class="content container">
+        <h1>Table of Contents</h1>
+        <h2>About</h2>
+        <h2>Posts</h2>
+        {posts.map((post) => <Preview post={post} />)}
+    </div>
+</Blog>

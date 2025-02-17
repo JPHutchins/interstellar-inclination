@@ -1,0 +1,17 @@
+:root {
+    --container-width: min(85vw, 700px);
+    --background-color-alt: hsl(188 10% 94%);
+    --background-color: hsl(188 2% 97%);
+    --text-color-header: black;
+    --text-color: hsl(188 5% 27%);
+    --text-color-alt: hsl(188 12% 24%);
+    --turquoise: #35cf9f;
+}
+
+[data-theme="dark"] {
+    --background-color-alt: hsl(188 10% 20%);
+    --background-color: hsl(188 2% 15%);
+    --text-color-header: white;
+    --text-color: hsl(188 5% 90%);
+    --text-color-alt: hsl(188 12% 85%);
+}

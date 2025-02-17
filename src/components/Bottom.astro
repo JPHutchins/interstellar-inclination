@@ -1,0 +1,45 @@
+<div class="bottom">
+    <div class="social-links">
+        <a href="https://github.com/JPHutchins" target="_blank" rel="noopener noreferrer">
+            <img src="github-mark.svg" alt="GitHub" />
+        </a>
+        <a
+            href="https://www.linkedin.com/in/j-p-hutchins-17357547/"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            <img src="linkedin-in.svg" alt="LinkedIn" />
+        </a>
+    </div>
+    &copy; JP Hutchins 2020-{new Date().getFullYear()}
+</div>
+
+<style>
+    .bottom {
+        background-color: var(--turquoise);
+        padding: 20px 5vw 10px;
+        text-align: center;
+        font-size: 0.85rem;
+        color: black;
+    }
+
+    a {
+        font-weight: bold;
+        color: var(--text-color-alt);
+        text-decoration: none;
+    }
+
+    .social-links {
+        justify-content: center;
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+        a {
+            display: flex;
+            align-items: center;
+            img {
+                max-height: 1rem;
+            }
+        }
+    }
+</style>
