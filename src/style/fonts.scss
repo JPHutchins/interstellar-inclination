@@ -1,0 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap");
+
+@font-face {
+    font-family: "Libertinus Serif";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/LibertinusSerif-Regular.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Libertinus Serif";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/LibertinusSerif-Italic.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Libertinus Serif";
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/LibertinusSerif-Bold.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Libertinus Serif";
+    font-style: italic;
+    font-weight: 700;
+    font-display: swap;
+    src: url("../fonts/LibertinusSerif-BoldItalic.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Libertinus Keyboard";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/LibertinusKeyboard-Regular.woff2") format("woff");
+}
+
+@font-face {
+    font-family: "Libertinus Math";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/LibertinusMath-Regular.woff2") format("woff");
+}
+
+@font-face {
+    font-family: "Libertinus Sans";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("../fonts/LibertinusSans-Regular.woff2") format("woff");
+}

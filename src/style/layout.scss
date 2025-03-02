@@ -12,7 +12,14 @@
 }
 
 .container {
-    width: var(--container-width);
+    max-width: min(50rem, 85%);
     margin-left: auto;
     margin-right: auto;
+}
+
+@media (max-width: 800px) {
+    .container {
+        max-width: 95vw;
+        padding: 0 0.02rem;
+    }
 }

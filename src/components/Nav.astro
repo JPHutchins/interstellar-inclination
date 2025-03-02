@@ -1,0 +1,107 @@
+---
+
+---
+
+<nav class="navbar">
+    <button class="hamburger" id="hamburger-button">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+    </button>
+    <div id="nav-links" class="nav-links">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/credits">Credits</a>
+    </div>
+</nav>
+
+<script>
+    document.getElementById("hamburger-button").addEventListener("click", function () {
+        const navLinks = document.getElementById("nav-links");
+        navLinks.classList.toggle("open");
+    });
+</script>
+
+<style>
+    .navbar {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-left: auto;
+        position: relative;
+    }
+
+    .hamburger {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        border: none;
+        background: none;
+    }
+
+    .hamburger .bar {
+        width: 25px;
+        height: 3px;
+        background-color: var(--text-color-aside);
+        margin: 4px 0;
+        transition: 0.4s;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .nav-links a {
+        font-family: "Libertinus Sans", sans-serif;
+        font-size: 1.1rem;
+        color: var(--text-color-aside);
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    @media (max-width: 800px) {
+        .hamburger {
+            display: flex;
+        }
+
+        .nav-links {
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            top: 80px;
+            right: -2.5vw;
+            background-color: var(--turquoise);
+            width: 100%;
+            text-align: center;
+            min-width: fit-content;
+            overflow: visible;
+        }
+
+        .nav-links.open {
+            display: flex;
+            gap: 0;
+            width: 100%;
+        }
+
+        .nav-links a {
+            font-size: 1.25rem;
+            padding: 1rem 2rem;
+            border-top: 1px solid var(--text-color-aside);
+        }
+
+        #dark-mode-toggle {
+            order: 3;
+            margin-left: auto;
+        }
+
+        .navbar {
+            order: 4;
+            margin-left: 0;
+        }
+    }
+</style>

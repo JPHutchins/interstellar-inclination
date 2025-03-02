@@ -1,25 +1,24 @@
 ---
 import Blog from "@layouts/blog";
 import Date from "@components/utilities/Date";
-import { published, getRSS } from "@data/post";
-import { MarkdownInstance } from "astro";
+import { published, getRSS, drafted } from "@data/post";
+import { getPosts } from "src/utils/get-posts";
+import type { GetStaticPaths } from "astro";
 
-export async function getStaticPaths({ rss }) {
-    const postsArray = (await Promise.all(
-        Object.values(import.meta.glob("../content/**/*.md")).map((fn) => fn())
-    )) as MarkdownInstance<any>[];
-
+export const getStaticPaths = (async () => {
     // rss(getRSS(postsArray));
+    const posts = await getPosts();
 
-    return published(postsArray).map((post) => {
-        return {
-            params: { post: post.slug },
-            props: { post },
-        };
-    });
-}
+    return [...published(posts), ...drafted(posts)].map((post) => ({
+        params: { post: post.slug },
+        props: { post },
+    }));
+}) satisfies GetStaticPaths;
 
 const { post } = Astro.props;
+const year = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+}).format(globalThis.Date.parse(post.date));
 ---
 
 <Blog title={post.title}>
@@ -30,6 +29,23 @@ const { post } = Astro.props;
         </div>
     </div>
     <div class="content container">
+        {
+            post.draft ? (
+                <p class="aside caution" style="color: var(--text-color-aside);">
+                    This post was shared privately and the link must not be shared with any third
+                    parties without approval of the Author. Furthermore, this post is a draft "work
+                    in progress" and may contain misstatements, errors, inaccuracies, or other
+                    unverified information, and should not be construed as representative of the
+                    Author's final opinions or conclusions.
+                </p>
+            ) : null
+        }
         <post.Content />
+        <p>
+            © {year} by {post.author}. Published under a Creative Commons Attribution-NonCommercial
+            4.0 International (<a href="https://creativecommons.org/licenses/by-nc/4.0/"
+                >CC BY-NC 4.0</a
+            >) license.
+        </p>
     </div>
 </Blog>

@@ -1,41 +1,24 @@
+@use "fonts";
 @use "reset";
 @use "variables";
 @use "layout";
 @use "content";
+@import url("https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css");
 
 html {
     font-size: 112.5%;
+    scroll-behavior: smooth;
+    scroll-margin-top: 1em;
 }
 
 body {
-    line-height: 1.6;
     tab-size: 4;
     font-weight: 400;
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial,
         Noto Sans, sans-serif;
     background: var(--background-color);
     color: var(--text-color);
-}
-
-a {
-    color: hsl(188 74% 50%);
-
-    &:hover,
-    &:focus {
-        color: hsl(188 74% 70%);
-    }
-}
-
-.post-header {
-    margin-top: 60px;
-    margin-bottom: 40px;
-}
-.post-date {
-    font-size: 0.75rem;
-}
-
-.content {
-    margin-bottom: 40px;
+    text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -44,5 +27,31 @@ h3,
 h4,
 h5,
 h6 {
-    color: var(--text-color-header);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial,
+        Noto Sans, sans-serif;
+    color: var(--text-color);
+    margin: 0em;
+}
+
+.post-header {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+@media (max-width: 800px) {
+    .content {
+        p {
+            font-size: 1.1rem;
+            line-height: 1.2;
+        }
+    }
+
+    .astro-code span {
+        font-size: 0.7rem;
+    }
+
+    p code {
+        font-size: 0.9rem;
+    }
 }

@@ -1,4 +1,6 @@
 .content {
+    width: 100%;
+
     h1,
     h2,
     h3,
@@ -20,8 +22,48 @@
         }
     }
 
+    a {
+        color: var(--text-color-link);
+
+        &:hover,
+        &:focus {
+            color: var(--text-color-link-hover);
+        }
+    }
+
     p {
-        margin-bottom: 30px;
+        font-family: "Libertinus Serif", serif;
+        font-variant-numeric: oldstyle-nums;
+        font-variant-ligatures: normal;
+        font-weight: normal;
+        font-optical-sizing: auto;
+        line-height: 1.38;
+        font-size: 1.2rem;
+        color: var(--text-color);
+        margin-bottom: 40px;
+    }
+
+    sup {
+        font-size: 1em;
+        vertical-align: super;
+        line-height: 0;
+        position: relative;
+    }
+
+    img {
+        height: auto;
+    }
+
+    li {
+        p {
+            margin: 0;
+            margin-bottom: 0.25rem;
+        }
+    }
+
+    ol,
+    ul {
+        margin-bottom: 40px;
     }
 
     pre {
@@ -29,5 +71,162 @@
         border-radius: 18px;
         margin-top: 22px;
         margin-bottom: 22px;
+    }
+
+    math {
+        font-family: "Libertinus Math", "math";
+        font-size: 1.3rem;
+    }
+
+    p code {
+        font-family: "Fira Code", monospace;
+        font-size: 1rem;
+        line-height: 1;
+        color: var(--text-color-inline-code);
+        background-color: var(--background-color-inline-code);
+        padding: 0.2em 0.25em;
+        border-radius: 0;
+    }
+
+    .anchor-link {
+        font-size: 1.2rem;
+        margin-right: 0.25em;
+        color: var(--text-color-link);
+
+        &:hover {
+            opacity: 1;
+            text-decoration: underline;
+            color: var(--text-color-link-hover);
+        }
+    }
+
+    .anchor {
+        scroll-margin-top: 1em;
+    }
+
+    .post-date {
+        font-size: 1rem;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue,
+            Arial, Noto Sans, sans-serif;
+    }
+
+    .astro-code {
+        span {
+            font-family: "Fira Code", monospace;
+            font-size: 0.92rem;
+            line-height: 1.4em;
+        }
+        background-color: black !important;
+        border-radius: 0 !important;
+    }
+
+    .aside {
+        padding: 1em;
+        border-left: 5px solid #888;
+        background: #f6f6f6;
+        margin: 1em 0;
+
+        p {
+            margin: 0;
+            color: var(--text-color-aside);
+        }
+
+        a {
+            color: var(--text-color-aside-link);
+
+            &:hover,
+            &:focus {
+                color: var(--text-color-aside-link-hover);
+            }
+        }
+    }
+
+    .aside::before {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 0.5em;
+        color: var(--text-color-aside);
+    }
+
+    .aside.note {
+        border-color: #007acc;
+        background: #e7f3ff;
+    }
+
+    .aside.note::before {
+        content: "📝 Note";
+    }
+
+    .aside.tip {
+        border-color: #22c55e;
+        background: #d1fae5;
+    }
+
+    .aside.tip::before {
+        content: "💡 Tip";
+    }
+
+    .aside.important {
+        border-color: #9333ea;
+        background: #f3e8ff;
+    }
+
+    .aside.important::before {
+        content: "❗ Important";
+    }
+
+    .aside.warning {
+        border-color: #d97706;
+        background: #fff3cd;
+    }
+
+    .aside.warning::before {
+        content: "⚠️ Warning";
+    }
+
+    .aside.caution {
+        border-color: #b91c1c;
+        background: #fee2e2;
+    }
+
+    .aside.caution::before {
+        content: "🛑 Caution";
+    }
+
+    .quote {
+        padding: 1em 1.5em;
+        margin: 1.5em 0;
+        border-left: 4px solid #bca9bd;
+        background: #f0f3f2;
+        font-style: italic;
+        color: #000000;
+        position: relative;
+
+        p {
+            margin: 0;
+            color: var(--text-color-aside);
+        }
+
+        cite {
+            display: block;
+            margin-top: 0.5em;
+            font-size: 0.875em;
+            text-align: right;
+
+            &::before {
+                content: "— ";
+            }
+        }
+    }
+
+    .keyboard {
+        font-family: "Libertinus Keyboard", monospace;
+        font-size: 1.1rem;
+        line-height: 1.2;
+        padding: 0.1em 0.2em;
+    }
+
+    .mermaid p {
+        color: var(--text-color-aside);
     }
 }

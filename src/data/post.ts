@@ -1,8 +1,10 @@
 type MarkdownInstance = import("astro").MarkdownInstance<any>;
+import { createHash } from "crypto";
 const { MODE } = import.meta.env;
 
 export type Post = {
     title: string;
+    author: string;
     slug: string;
     preview: string;
     timestamp: number;
@@ -12,24 +14,44 @@ export type Post = {
     Content: string;
 };
 
-export function single(post: MarkdownInstance): Post {
-    const slug = post.file.split("/").reverse()[0].replace(".md", "");
-    return {
-        ...post.frontmatter,
-        Content: post.Content,
-        slug: slug,
-        draft: post.file.split("/").reverse()[1] === "drafts",
-        timestamp: new Date(post.frontmatter.date).valueOf(),
-    };
+function hashString(str: string): string {
+    return createHash("sha256").update(str).digest("hex");
 }
 
-export function published(posts: MarkdownInstance[]): Post[] {
-    return posts
+const isDraft = (post: MarkdownInstance): boolean => post.file.split("/").reverse()[2] === "drafts";
+
+const singlePublished = (post: MarkdownInstance): Post => ({
+    ...post.frontmatter,
+    Content: post.Content,
+    slug:
+        MODE === "development" && isDraft(post)
+            ? hashString(post.file)
+            : post.file.split("/").reverse()[1],
+    draft: isDraft(post),
+    timestamp: new Date(post.frontmatter.date).valueOf(),
+});
+
+export const published = (posts: MarkdownInstance[]): Post[] =>
+    posts
         .filter((post) => post.frontmatter.title)
-        .map((post) => single(post))
+        .map((post) => singlePublished(post))
         .filter((post) => MODE === "development" || !post.draft)
         .sort((a, b) => b.timestamp - a.timestamp);
-}
+
+const singleDrafted = (post: MarkdownInstance): Post => ({
+    ...post.frontmatter,
+    Content: post.Content,
+    slug: hashString(post.file),
+    draft: isDraft(post),
+    timestamp: new Date(post.frontmatter.date).valueOf(),
+});
+
+export const drafted = (posts: MarkdownInstance[]): Post[] =>
+    posts
+        .filter((post) => post.frontmatter.title)
+        .map((post) => singleDrafted(post))
+        .filter((post) => post.draft)
+        .sort((a, b) => b.timestamp - a.timestamp);
 
 export function getRSS(posts: MarkdownInstance[]) {
     return {
