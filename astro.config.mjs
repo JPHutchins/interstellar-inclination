@@ -9,11 +9,17 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import remarkDirective from "remark-directive";
 import rehypeAside from "./src/utils/rehype-aside.ts";
+import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
-    site: "https://jphutchins.github.io",
-    integrations: [mdx()],
+    site: "https://www.crumpledpaper.tech",
+    integrations: [
+        mdx(),
+        sitemap({
+            filter: (page) => page.search("draft-") === -1,
+        }),
+    ],
     markdown: {
         remarkPlugins: [
             remarkGfm,
