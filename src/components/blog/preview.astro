@@ -5,7 +5,7 @@ const post: Post = Astro.props.post;
 ---
 
 <div>
-    <h3><a href={`/${post.slug}`}>{post.title}</a></h3>
+    <h2><a href={`/${post.slug}`}>{post.title}</a></h2>
     <div class="post-date">
         <Date date={post.date} />
     </div>
