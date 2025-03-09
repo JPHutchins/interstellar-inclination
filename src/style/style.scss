@@ -9,6 +9,7 @@ html {
     font-size: 112.5%;
     scroll-behavior: smooth;
     scroll-margin-top: 1em;
+    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
 }
 
 body {
