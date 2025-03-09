@@ -114,6 +114,15 @@
         background-color: black !important;
         border-radius: 0 !important;
 
+        padding: 1rem 0.75rem;
+
+        & {
+            @media (max-width: 1024px) {
+                margin-left: -0.75rem;
+                margin-right: -0.75rem;
+            }
+        }
+
         span {
             font-family: "Fira Code", monospace;
             font-size: 0.92rem;

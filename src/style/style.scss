@@ -43,14 +43,14 @@ h6 {
 @media (max-width: 1024px) {
     .content {
         p {
-            font-size: 1.1rem;
+            font-size: 1rem;
+
+            code {
+                font-size: 0.75rem;
+            }
         }
         .astro-code span {
             font-size: 0.7rem;
         }
-    }
-
-    p code {
-        font-size: 0.9rem;
     }
 }
