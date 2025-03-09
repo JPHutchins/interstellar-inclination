@@ -19,7 +19,7 @@ This is a demo of some of the Astro features available to this website.
 
 # 1# Header
 
-Should not be used because it conflicts with the page's existing `<h1>`.
+In this website, it should not be used because it conflicts with the page's existing `<h1>`.
 
 ## 2# Header
 

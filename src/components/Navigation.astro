@@ -20,6 +20,16 @@
     .nav-links a {
         display: inline-block;
         padding: 15px 20px;
+        color: var(--text-color-aside);
+        text-decoration: none;
+        font-size: 1.3rem;
+        font-family: "Libertinus Sans", sans-serif;
+        font-weight: bold;
+    }
+
+    .nav-links a:hover,
+    .nav-links a:focus {
+        text-decoration: underline;
     }
 
     @media (max-width: 1024px) {
@@ -35,8 +45,7 @@
             text-align: center;
             padding: 10px 0;
             text-decoration: none;
-            font-size: 1.2rem;
-            font-weight: bold;
+
             color: var(--text-color-aside);
             background-color: var(--turquoise);
             border-top: 1px solid var(--text-color-aside);

@@ -36,16 +36,25 @@ const year = new Intl.DateTimeFormat("en-US", {
                     parties without approval of the Author. Furthermore, this post is a draft "work
                     in progress" and may contain misstatements, errors, inaccuracies, or other
                     unverified information, and should not be construed as representative of the
-                    Author's final opinions or conclusions.
+                    Author's opinion.
                 </p>
             ) : null
         }
         <post.Content />
-        <p>
-            © {year} by {post.author}. Published under a Creative Commons Attribution-NonCommercial
-            4.0 International (<a href="https://creativecommons.org/licenses/by-nc/4.0/"
-                >CC BY-NC 4.0</a
-            >) license.
-        </p>
+
+        {
+            post.draft ? (
+                <p>
+                    © {year} by {post.author}. All Rights Reserved.
+                </p>
+            ) : (
+                <p>
+                    © {year} by {post.author}. Published under a Creative Commons
+                    Attribution-NonCommercial 4.0 International (
+                    <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>)
+                    license.
+                </p>
+            )
+        }
     </div>
 </Blog>
