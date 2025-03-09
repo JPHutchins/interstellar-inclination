@@ -1,16 +1,24 @@
 ---
 import DarkModeToggle from "@components/DarkModeToggle";
-import Nav from "@components/Nav";
+import Navigation from "@components/Navigation";
+import Hamburger from "@components/Hamburger";
 ---
 
 <div class="top">
     <div class="container">
         <img src="/crumpledpaper_100x100.png" alt="Crumpled Paper" />
         <a href="/">Crumpled<br />Paper</a>
-        <Nav />
+        <Navigation />
         <DarkModeToggle />
+        <Hamburger />
     </div>
 </div>
+
+<script>
+    document.querySelector(".hamburger")?.addEventListener("click", () => {
+        document.querySelector(".nav-links")?.classList.toggle("expanded");
+    });
+</script>
 
 <style>
     .top {
@@ -24,6 +32,10 @@ import Nav from "@components/Nav";
             gap: 1rem;
             img {
                 max-height: 4rem;
+            }
+
+            nav {
+                margin-left: auto;
             }
         }
     }

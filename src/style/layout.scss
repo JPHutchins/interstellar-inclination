@@ -17,9 +17,9 @@
     margin-right: auto;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1024px) {
     .container {
-        max-width: 95vw;
-        padding: 0 0.02rem;
+        max-width: unset;
+        padding: 0 0.75rem;
     }
 }
