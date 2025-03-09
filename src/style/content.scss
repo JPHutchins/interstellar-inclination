@@ -1,3 +1,16 @@
+.post-date {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial,
+        Noto Sans, sans-serif;
+}
+
+.post-header {
+    h1 {
+        line-height: 1.25;
+    }
+}
+
 .content {
     width: 100%;
 
@@ -7,6 +20,7 @@
     h4,
     h5,
     h6 {
+        line-height: 1.25;
         margin-top: 2.4em;
         margin-bottom: 0.56em;
 
@@ -102,12 +116,6 @@
 
     .anchor {
         scroll-margin-top: 1em;
-    }
-
-    .post-date {
-        font-size: 1rem;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue,
-            Arial, Noto Sans, sans-serif;
     }
 
     .astro-code {
