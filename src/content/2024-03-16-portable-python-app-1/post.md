@@ -2,7 +2,9 @@
 title: Building a Universally Portable Python App
 author: JP Hutchins
 date: 2024-03-16
-preview: Listen to yourself! No, he has known everything, all along. Where were you today? In the lab? And you don't think it's possible that Tyrus lifted the cigarette out of your locker?
+preview: |
+    The introductory post of a series about designing, building, and sharing
+    universally compatible software written in Python.
 ---
 
 Welcome to the first article of a series about deploying a universally portable Python application.

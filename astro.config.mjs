@@ -10,6 +10,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import remarkDirective from "remark-directive";
 import rehypeAside from "./src/utils/rehype-aside.ts";
 import sitemap from "@astrojs/sitemap";
+import { mermaid } from "./src/plugins/mermaid";
 
 // https://astro.build/config
 export default defineConfig({
@@ -22,6 +23,7 @@ export default defineConfig({
     ],
     markdown: {
         remarkPlugins: [
+            mermaid,
             remarkGfm,
             remarkDirective,
             remarkMath,

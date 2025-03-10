@@ -18,9 +18,6 @@ const { title } = Astro.props;
             <slot />
             <Bottom />
         </div>
-        <script type="module">
-            import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/+esm";
-        </script>
         <script is:inline>
             const themeToggle = document.getElementById("dark-mode-toggle");
 
@@ -36,6 +33,38 @@ const { title } = Astro.props;
                 const currentTheme = document.documentElement.getAttribute("data-theme");
                 setTheme(currentTheme === "dark" ? "light" : "dark");
             });
+        </script>
+        <script>
+            const { default: mermaid } = await import("mermaid");
+            // Source: https://github.com/JuanM04/portfolio/blob/983b0ed0eabdac37bf8b7912d3e8128a443192b9/src/pages/docs/%5B...documentSlug%5D.astro#L74-L103
+            // From this comment: https://github.com/withastro/astro/issues/4433#issuecomment-1584019991
+            /**
+             * @params {HTMLCollectionOf<HTMLElement>} graphs
+             */
+            async function renderDiagrams(graphs) {
+                mermaid.initialize({
+                    startOnLoad: false,
+                    fontFamily:
+                        "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+                    theme: "neutral",
+                });
+
+                for (const graph of graphs) {
+                    const content = graph.querySelector(".mermaid-src").innerText;
+                    if (!content) continue;
+                    let svg = document.createElement("svg");
+                    const id = (svg.id = "mermaid-" + Math.round(Math.random() * 100000));
+                    graph.appendChild(svg);
+                    mermaid.render(id, content).then((result) => {
+                        graph.innerHTML = result.svg;
+                    });
+                }
+            }
+
+            const graphs = document.getElementsByClassName("mermaid");
+            if (document.getElementsByClassName("mermaid").length > 0) {
+                renderDiagrams(graphs);
+            }
         </script>
     </body>
 </html>
