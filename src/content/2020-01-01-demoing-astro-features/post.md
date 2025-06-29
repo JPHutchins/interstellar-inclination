@@ -52,11 +52,13 @@ First footnote[^1] and second footnote.[^2]
 | One | Two | Three |
 | --- | --- | ----- |
 | A   | B   | C     |
+| D   | E   | F     |
 ```
 
 | One | Two | Three |
 | --- | --- | ----- |
 | A   | B   | C     |
+| D   | E   | F     |
 
 ## Math
 
