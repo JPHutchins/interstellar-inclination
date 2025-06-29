@@ -7,7 +7,16 @@ interface Parent extends Node {
 }
 
 interface TextNode extends Node {
+    type: "text";
     value: string;
+}
+
+function isTextNode(node: Node): node is TextNode {
+    return node.type === "text";
+}
+
+function isElement(node: Node): node is Element {
+    return node.type === "element";
 }
 
 export default function rehypeAside() {
@@ -16,20 +25,40 @@ export default function rehypeAside() {
             if (node.tagName === "blockquote" && parent) {
                 let type = "quote";
                 let asideChildren: Node[] = [];
+                let foundMarker = false;
 
                 // Loop through children to extract the type and collect content
                 for (let child of node.children) {
                     if (
-                        (child as Element).tagName === "p" &&
-                        (child as Element).children.length > 0
+                        isElement(child) &&
+                        child.tagName === "p" &&
+                        child.children.length > 0 &&
+                        !foundMarker
                     ) {
-                        const textNode = (child as Element).children[0] as TextNode;
-                        const text = textNode.value || "";
-                        const match = text.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]/i);
+                        // Find the first text node to check for the marker
+                        for (let i = 0; i < child.children.length; i++) {
+                            const textNode = child.children[i];
+                            if (isTextNode(textNode)) {
+                                const text = textNode.value || "";
+                                const match = text.match(
+                                    /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i
+                                );
 
-                        if (match) {
-                            type = match[1].toLowerCase();
-                            textNode.value = text.replace(match[0], "").trim();
+                                if (match) {
+                                    type = match[1].toLowerCase();
+                                    foundMarker = true;
+
+                                    // Remove the marker and any following whitespace
+                                    const cleanedText = text.replace(match[0], "");
+                                    if (cleanedText.trim()) {
+                                        textNode.value = cleanedText;
+                                    } else {
+                                        // Remove the entire text node if it's empty
+                                        child.children.splice(i, 1);
+                                    }
+                                    break;
+                                }
+                            }
                         }
                     }
                     asideChildren.push(child); // Add all content to the aside
