@@ -3,7 +3,7 @@ title: Enum Type Safety in C
 author: JP Hutchins
 date: 2024-12-16
 preview: |
-  How to use C enums to guarantee exhaustive pattern matching.
+  C enums can guarantee exhaustive pattern matching at compile time.
 ---
 
 The C standard allows the programmer to define new types, including enumerated types—or "enums"—that improve program readability and type safety. This article explores the specification for enumerated types, the compiler options that improve enum type safety, and why type safety prevents run time errors. The focus is on the GCC and Clang C compilers targeting ARM32 (e.g. Cortex-M MCUs), but the same conclusions should apply to all C targets, including RISCV, x86_64, and ARM64.
@@ -353,9 +353,9 @@ Even though the integer literal is in range of the enum, use of the integer lite
 
 While the C standard may not provide guarantees about enum type safety, the specification lays the groundwork on which compilers have built meaningful assurances of run time correctness.
 
-By avoiding use of a `default` case and adding the `-Werror -Wall -Wextra -Wc++-compat` compiler options, it is **"impossible to generate a run time error"**. Yet, if that is true, then it raises the question:
-
-#### If a run time error is not possible, can `assert(0)` be replaced with `__builtin_unreachable()`?
+By avoiding use of a `default` case and adding the `-Werror -Wall -Wextra -Wc++-compat` compiler options, it is **"impossible to generate a run time error"**. Yet, if that is true, then it raises a question about
+the necessity of runtime type checking.
+> [!CAUTION] If a run time error is not possible, can `assert(0)` be replaced with `__builtin_unreachable()`?
 
 ```c
 enum result handle_event(enum event event) {
