@@ -11,6 +11,8 @@ In the first part of this series, we set up a repository for a universally porta
 
 [GitHub Actions](https://github.com/features/actions) are automated routines that run on GitHub's sandboxed virtual machine servers, called "runners", and are ([probably](https://docs.github.com/en/billing/managing-billing-for-github-actions/about-billing-for-github-actions)) free for your Public open source projects!
 
+## Table of Contents
+
 ## Security
 
 Let's first walk through the security threats that we will mitigate when deploying an app to PyPI. Here is a list of threats that could put your users, and you, at risk:
@@ -37,16 +39,22 @@ Once we've learned how to mitigate each of these risks, we will show how applyin
 > [!WARNING]
 > An attacker poses as a contributor and merges malicious code to your package via a **Pull Request**.
 
-By default, GitHub will not allow any modification of your repository without your explicit approval. This threat can be minimized by carefully reviewing all contributions to your repository and only elevating a contributor's privileges once they are a trusted partner.[<sup>1</sup>](#fn-footnotes-1) If you believe that a PR is attempting to inject a security vulnerability in your app, then you should [report the offending account](https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam#reporting-an-issue-or-pull-request).
+By default, GitHub will not allow any modification of your repository without your explicit approval. This threat can be minimized by carefully reviewing all contributions to your repository and only elevating a contributor's privileges once they are a trusted partner.[^1] If you believe that a PR is attempting to inject a security vulnerability in your app, then you should [report the offending account](https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam#reporting-an-issue-or-pull-request).
+
+[^1]: However, even if a contributor has made valuable contributions over years, you may eventually learn that you were the subject of a sophisticated social engineering campaign perpetrated by some larger government or private entity. ["XZ Utils backdoor"](https://en.wikipedia.org/wiki/XZ_Utils_backdoor). Wikipedia.com. Retrieved 2024-04-14.
 
 ### 2\. Vulnerability in the Package Repository (PyPI)
 
 > [!WARNING]
 > An attacker hacks PyPI so that when a user tries to install your app, they install a malicious package instead.
 
-According to Stack Overflow's 2023 Developer Survey, **45.32% of professional developers use Python**.[<sup>2</sup>](#fn-footnotes-2) Every industry and government in the world would be impacted by this threat and therefore has a financial incentive to keep PyPI secure.
+According to Stack Overflow's 2023 Developer Survey, **45.32% of professional developers use Python**.[^2] Every industry and government in the world would be impacted by this threat and therefore has a financial incentive to keep PyPI secure.
 
-PyPI completed a security audit in late 2023 that found and remediated some non-critical security risks.[<sup>3</sup>](#fn-footnotes-3)
+[^2]: ["Stack Overflow Developer Survey 2023 - Programming, scripting, and markup languages"](https://survey.stackoverflow.co/2023/#section-most-popular-technologies-programming-scripting-and-markup-languages). stackoverflow.co. Retrieved 2024-04-14.
+
+PyPI completed a security audit in late 2023 that found and remediated some non-critical security risks.[^3]
+
+[^3]: ["PyPI Completes First Security Audit"](https://blog.pypi.org/posts/2023-11-14-1-pypi-completes-first-security-audit/). PyPI.org. Retrieved 2024-04-14.
 
 ### Authentication
 
@@ -148,7 +156,9 @@ It is your responsibility as the package maintainer to select broadly-used and w
 
 On March 25th, 2024, Checkmarx broke the news of a successful supply chain attack that affected more than 170,000 Python users.
 
-Once infected, the attackers would have remote access to the user's Browser Data, Discord Data, Cryptocurrency Wallets, Telegram Sessions, User Data and Documents Folders, and Instagram Data.[<sup>4</sup>](#fn-footnotes-4) I suggest reading the entire [article](https://checkmarx.com/blog/over-170k-users-affected-by-attack-using-fake-python-infrastructure/) before returning here to see how every aspect of the attack would have been mitigated by the strategies discussed above.
+Once infected, the attackers would have remote access to the user's Browser Data, Discord Data, Cryptocurrency Wallets, Telegram Sessions, User Data and Documents Folders, and Instagram Data.[^4] I suggest reading the entire [article](https://checkmarx.com/blog/over-170k-users-affected-by-attack-using-fake-python-infrastructure/) before returning here to see how every aspect of the attack would have been mitigated by the strategies discussed above.
+
+[^4]: ["Over 170K Users Affected by Attack Using Fake Python Infrastructure"](https://checkmarx.com/blog/over-170k-users-affected-by-attack-using-fake-python-infrastructure/). Checkmarx.com. Retrieved 2024-04-14.
 
 ### Protecting Your GitHub Account
 
@@ -492,13 +502,3 @@ pipx upgrade <YOUR APP>
 With a release workflow that is securely automated by a GitHub Action, you can quickly iterate on your application or library and provide clear instructions to your users about how to receive an authentic copy of your software.
 
 In the next part of this series, we will use the same Release Workflow to create the universally portable versions of the application so that your users do not need a Python environment to use your application.
-
-## Footnotes
-
-1. [^](#fnr-footnotes-1) However, even if a contributor has made valuable contributions over years, you may eventually learn that you were the subject of a sophisticated social engineering campaign perpetrated by some larger government or private entity. ["XZ Utils backdoor"](https://en.wikipedia.org/wiki/XZ_Utils_backdoor). Wikipedia.com. Retrieved 2024-04-14.
-    
-2. [^](#fnr-footnotes-2) ["Stack Overflow Developer Survey 2023 - Programming, scripting, and markup languages"](https://survey.stackoverflow.co/2023/#section-most-popular-technologies-programming-scripting-and-markup-languages). stackoverflow.co. Retrieved 2024-04-14.
-    
-3. [^](#fnr-footnotes-3) ["PyPI Completes First Security Audit"](https://blog.pypi.org/posts/2023-11-14-1-pypi-completes-first-security-audit/). PyPI.org. Retrieved 2024-04-14.
-    
-4. [^](#fnr-footnotes-4) ["Over 170K Users Affected by Attack Using Fake Python Infrastructure"](https://checkmarx.com/blog/over-170k-users-affected-by-attack-using-fake-python-infrastructure/). Checkmarx.com. Retrieved 2024-04-14.
