@@ -2,6 +2,7 @@
 title: Enum Type Safety in C
 author: JP Hutchins
 date: 2024-12-16
+icon: /c_logo.png
 preview: |
   C enums can guarantee exhaustive pattern matching at compile time.
 ---

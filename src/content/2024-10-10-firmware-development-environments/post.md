@@ -2,6 +2,7 @@
 title: Comparing Firmware Development Environments
 author: JP Hutchins
 date: 2024-10-10
+emoji: 🛠️
 preview: |
     A comparison of developer experience and toolchain performance in Window 11,
     WSL2, Ubuntu 24.04, and VMWare Workstation 17.

@@ -12,6 +12,8 @@ export type Post = {
     date: string;
     file: URL;
     Content: string;
+    icon?: string;
+    emoji?: string;
 };
 
 function obfuscatedPath(str: string): string {

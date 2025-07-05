@@ -2,6 +2,7 @@
 title: GitHub Actions for the Python Package Index
 author: JP Hutchins
 date: 2024-06-08
+icon: /python.png
 preview: |
     The introductory post of a series about designing, building, and sharing
     universally compatible software written in Python.

@@ -2,6 +2,7 @@
 title: Generic Request -> Response Protocol
 author: JP Hutchins
 date: 2024-10-13
+icon: /python.png
 preview: |
     Python can provide 100% static type coverage for a transport by inferring
     the Type of Response based on the Type of Request.

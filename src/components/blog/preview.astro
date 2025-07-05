@@ -2,15 +2,23 @@
 import type { Post } from "@data/post";
 import Date from "@components/utilities/Date";
 const post: Post = Astro.props.post;
+const icon = post.icon ?? "/crumpledpaper_100x100.png";
 ---
 
-<div>
+<div class="article-title">
+    {
+        post.emoji ? (
+            <span class="article-emoji">{post.emoji}</span>
+        ) : (
+            <img src={icon} alt="Article icon" class="article-icon" />
+        )
+    }
     <h2><a href={`/${post.slug}`}>{post.title}</a></h2>
-    <div class="post-date">
-        <Date date={post.date} />
-    </div>
-    <p>{post.preview}</p>
 </div>
+<div class="post-date">
+    <Date date={post.date} />
+</div>
+<p>{post.preview}</p>
 
 <style>
     h2 {
@@ -19,5 +27,22 @@ const post: Post = Astro.props.post;
 
     p {
         margin-top: 0.75rem;
+    }
+
+    .article-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75em;
+    }
+    .article-icon {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+    }
+    .article-emoji {
+        font-size: 1.5rem;
+        margin-right: 0.1em;
+        vertical-align: middle;
+        line-height: 1;
     }
 </style>
