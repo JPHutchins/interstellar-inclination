@@ -4,8 +4,7 @@ author: JP Hutchins
 date: 2024-06-08
 icon: /python.png
 preview: |
-    The introductory post of a series about designing, building, and sharing
-    universally compatible software written in Python.
+    A tutorial on mitigating security threats when distributing Python packages.
 ---
 
 In the first part of this series, we set up a repository for a universally portable Python app. Today, we will register the package with [PyPI, the Python Package Index](https://pypi.org/), and use a GitHub Release Action to automate the distribution so that other Python users can install the app with `pipx` or `pip`.
