@@ -15,43 +15,43 @@ import { remarkTabbedCode } from "./src/plugins/remark-tabbed-code.ts";
 
 // https://astro.build/config
 export default defineConfig({
-    site: "https://www.crumpledpaper.tech",
-    integrations: [
-        mdx(),
-        sitemap({
-            filter: (page) => page.search("draft-") === -1,
-        }),
-    ],
-    markdown: {
-        remarkPlugins: [
-            mermaid,
-            remarkGfm,
-            remarkDirective,
-            remarkTabbedCode,
-            remarkMath,
-            [remarkToc, { heading: "Table of Contents", maxDepth: 3 }],
-        ],
-        gfm: true,
-        rehypePlugins: [
-            rehypeAside,
-            rehypeKatex,
-            rehypeSlug,
-            [
-                rehypeAutolinkHeadings,
-                {
-                    behavior: "prepend",
-                    content: {
-                        type: "text",
-                        value: "#",
-                    },
-                    headingProperties: {
-                        className: ["anchor"],
-                    },
-                    properties: {
-                        className: ["anchor-link"],
-                    },
-                },
-            ],
-        ],
-    },
+	site: "https://www.crumpledpaper.tech",
+	integrations: [
+		mdx(),
+		sitemap({
+			filter: (page) => page.search("draft-") === -1,
+		}),
+	],
+	markdown: {
+		remarkPlugins: [
+			mermaid,
+			remarkGfm,
+			remarkDirective,
+			remarkTabbedCode,
+			remarkMath,
+			[remarkToc, { heading: "Table of Contents", maxDepth: 3 }],
+		],
+		gfm: true,
+		rehypePlugins: [
+			rehypeAside,
+			rehypeKatex,
+			rehypeSlug,
+			[
+				rehypeAutolinkHeadings,
+				{
+					behavior: "prepend",
+					content: {
+						type: "text",
+						value: "#",
+					},
+					headingProperties: {
+						className: ["anchor"],
+					},
+					properties: {
+						className: ["anchor-link"],
+					},
+				},
+			],
+		],
+	},
 });

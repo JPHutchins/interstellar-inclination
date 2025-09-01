@@ -1,14 +1,14 @@
 ---
 interface Props {
-    date: string;
+	date: string;
 }
 
 const { date } = Astro.props;
 
 const formattedDate = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+	year: "numeric",
+	month: "long",
+	day: "numeric",
 }).format(globalThis.Date.parse(date));
 ---
 

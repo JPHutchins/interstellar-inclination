@@ -8,10 +8,10 @@ const posts = published(await getPosts());
 ---
 
 <Blog title="Crumpled Paper">
-    <div class="post-header container">
-        <h1 class="post-title">Posts</h1>
-    </div>
-    <div class="content container">
-        {posts.map((post) => <Preview post={post} />)}
-    </div>
+	<div class="post-header container">
+		<h1 class="post-title">Posts</h1>
+	</div>
+	<div class="content container">
+		{posts.map((post) => <Preview post={post} />)}
+	</div>
 </Blog>

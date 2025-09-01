@@ -5,52 +5,52 @@ import Hamburger from "@components/Hamburger";
 ---
 
 <div class="top">
-    <div class="container">
-        <img src="/crumpledpaper_100x100.png" alt="Crumpled Paper" />
-        <a href="/">Crumpled<br />Paper</a>
-        <Navigation />
-        <DarkModeToggle />
-        <Hamburger />
-    </div>
+	<div class="container">
+		<img src="/crumpledpaper_100x100.png" alt="Crumpled Paper" />
+		<a href="/">Crumpled<br />Paper</a>
+		<Navigation />
+		<DarkModeToggle />
+		<Hamburger />
+	</div>
 </div>
 
 <script>
-    document.querySelector(".hamburger")?.addEventListener("click", () => {
-        document.querySelector(".nav-links")?.classList.toggle("expanded");
-    });
+	document.querySelector(".hamburger")?.addEventListener("click", () => {
+		document.querySelector(".nav-links")?.classList.toggle("expanded");
+	});
 </script>
 
 <style>
-    .top {
-        background-color: var(--turquoise);
-        margin-bottom: 20px;
-        .container {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 1rem;
-            img {
-                max-height: 4rem;
-            }
+	.top {
+		background-color: var(--turquoise);
+		margin-bottom: 20px;
+		.container {
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			gap: 1rem;
+			img {
+				max-height: 4rem;
+			}
 
-            nav {
-                margin-left: auto;
-            }
-        }
-    }
+			nav {
+				margin-left: auto;
+			}
+		}
+	}
 
-    a {
-        font-family: "Fira Code", monospace;
-        font-size: 1.4rem;
-        font-weight: bold;
-        line-height: 1;
-        color: var(--text-color-aside);
-        text-decoration: none;
-    }
+	a {
+		font-family: "Fira Code", monospace;
+		font-size: 1.4rem;
+		font-weight: bold;
+		line-height: 1;
+		color: var(--text-color-aside);
+		text-decoration: none;
+	}
 
-    @media (max-width: 1024px) {
-        .top {
-            height: 72px;
-        }
-    }
+	@media (max-width: 1024px) {
+		.top {
+			height: 72px;
+		}
+	}
 </style>

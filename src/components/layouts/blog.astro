@@ -6,67 +6,67 @@ const { title } = Astro.props;
 ---
 
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width" />
-        <title>{title}</title>
-        <link rel="sitemap" href="/sitemap-index.xml" />
-    </head>
-    <body>
-        <div class="main">
-            <Top />
-            <slot />
-            <Bottom />
-        </div>
-        <script is:inline>
-            const themeToggle = document.getElementById("dark-mode-toggle");
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{title}</title>
+		<link rel="sitemap" href="/sitemap-index.xml" />
+	</head>
+	<body>
+		<div class="main">
+			<Top />
+			<slot />
+			<Bottom />
+		</div>
+		<script is:inline>
+			const themeToggle = document.getElementById("dark-mode-toggle");
 
-            const setTheme = (theme) => {
-                document.documentElement.setAttribute("data-theme", theme);
-                themeToggle.checked = theme === "dark";
-                localStorage.setItem("theme", theme);
-            };
+			const setTheme = (theme) => {
+				document.documentElement.setAttribute("data-theme", theme);
+				themeToggle.checked = theme === "dark";
+				localStorage.setItem("theme", theme);
+			};
 
-            setTheme(localStorage.getItem("theme") || "light");
+			setTheme(localStorage.getItem("theme") || "light");
 
-            themeToggle.addEventListener("change", () => {
-                const currentTheme = document.documentElement.getAttribute("data-theme");
-                setTheme(currentTheme === "dark" ? "light" : "dark");
-            });
-        </script>
-        <script>
-            document.addEventListener("DOMContentLoaded", async () => {
-                const { default: mermaid } = await import("mermaid");
-                // Source: https://github.com/JuanM04/portfolio/blob/983b0ed0eabdac37bf8b7912d3e8128a443192b9/src/pages/docs/%5B...documentSlug%5D.astro#L74-L103
-                // From this comment: https://github.com/withastro/astro/issues/4433#issuecomment-1584019991
-                /**
-                 * @params {HTMLCollectionOf<HTMLElement>} graphs
-                 */
-                async function renderDiagrams(graphs) {
-                    mermaid.initialize({
-                        startOnLoad: false,
-                        fontFamily:
-                            "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-                        theme: "neutral",
-                    });
+			themeToggle.addEventListener("change", () => {
+				const currentTheme = document.documentElement.getAttribute("data-theme");
+				setTheme(currentTheme === "dark" ? "light" : "dark");
+			});
+		</script>
+		<script>
+			document.addEventListener("DOMContentLoaded", async () => {
+				const { default: mermaid } = await import("mermaid");
+				// Source: https://github.com/JuanM04/portfolio/blob/983b0ed0eabdac37bf8b7912d3e8128a443192b9/src/pages/docs/%5B...documentSlug%5D.astro#L74-L103
+				// From this comment: https://github.com/withastro/astro/issues/4433#issuecomment-1584019991
+				/**
+				 * @params {HTMLCollectionOf<HTMLElement>} graphs
+				 */
+				async function renderDiagrams(graphs) {
+					mermaid.initialize({
+						startOnLoad: false,
+						fontFamily:
+							"ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+						theme: "neutral",
+					});
 
-                    for (const graph of graphs) {
-                        const content = graph.querySelector(".mermaid-src").innerText;
-                        if (!content) continue;
-                        let svg = document.createElement("svg");
-                        const id = (svg.id = "mermaid-" + Math.round(Math.random() * 100000));
-                        graph.appendChild(svg);
-                        mermaid.render(id, content).then((result) => {
-                            graph.innerHTML = result.svg;
-                        });
-                    }
-                }
+					for (const graph of graphs) {
+						const content = graph.querySelector(".mermaid-src").innerText;
+						if (!content) continue;
+						let svg = document.createElement("svg");
+						const id = (svg.id = "mermaid-" + Math.round(Math.random() * 100000));
+						graph.appendChild(svg);
+						mermaid.render(id, content).then((result) => {
+							graph.innerHTML = result.svg;
+						});
+					}
+				}
 
-                const graphs = document.getElementsByClassName("mermaid");
-                if (document.getElementsByClassName("mermaid").length > 0) {
-                    renderDiagrams(graphs);
-                }
-            });
-        </script>
-    </body>
+				const graphs = document.getElementsByClassName("mermaid");
+				if (document.getElementsByClassName("mermaid").length > 0) {
+					renderDiagrams(graphs);
+				}
+			});
+		</script>
+	</body>
 </html>

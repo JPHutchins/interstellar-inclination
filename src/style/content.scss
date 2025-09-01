@@ -1,256 +1,264 @@
 .post-date {
-    margin-top: 0.5rem;
-    font-size: 1rem;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial,
-        Noto Sans, sans-serif;
+	margin-top: 0.5rem;
+	font-size: 1rem;
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		Segoe UI,
+		Roboto,
+		Helvetica Neue,
+		Arial,
+		Noto Sans,
+		sans-serif;
 }
 
 .post-header {
-    h1 {
-        line-height: 1.25;
-    }
+	h1 {
+		line-height: 1.25;
+	}
 }
 
 .content {
-    width: 100%;
+	width: 100%;
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        line-height: 1.25;
-        margin-top: 1.7em;
-        margin-bottom: 0.56em;
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		line-height: 1.25;
+		margin-top: 1.7em;
+		margin-bottom: 0.56em;
 
-        a {
-            color: inherit;
-            text-decoration: none;
+		a {
+			color: inherit;
+			text-decoration: none;
 
-            &:hover,
-            &:focus {
-                color: inherit;
-                text-decoration: underline;
-            }
-        }
-    }
+			&:hover,
+			&:focus {
+				color: inherit;
+				text-decoration: underline;
+			}
+		}
+	}
 
-    a {
-        color: var(--text-color-link);
+	a {
+		color: var(--text-color-link);
 
-        &:hover,
-        &:focus {
-            color: var(--text-color-link-hover);
-        }
-    }
+		&:hover,
+		&:focus {
+			color: var(--text-color-link-hover);
+		}
+	}
 
-    p {
-        font-family: "Libertinus Serif", serif;
-        font-variant-numeric: oldstyle-nums;
-        font-variant-ligatures: normal;
-        font-weight: normal;
-        font-optical-sizing: auto;
-        line-height: 1.38;
-        font-size: 1.2rem;
-        color: var(--text-color);
-        margin-bottom: 1em;
-    }
+	p {
+		font-family: "Libertinus Serif", serif;
+		font-variant-numeric: oldstyle-nums;
+		font-variant-ligatures: normal;
+		font-weight: normal;
+		font-optical-sizing: auto;
+		line-height: 1.38;
+		font-size: 1.2rem;
+		color: var(--text-color);
+		margin-bottom: 1em;
+	}
 
-    sup {
-        font-size: 1em;
-        vertical-align: super;
-        line-height: 0;
-        position: relative;
-    }
+	sup {
+		font-size: 1em;
+		vertical-align: super;
+		line-height: 0;
+		position: relative;
+	}
 
-    img {
-        height: auto;
-    }
+	img {
+		height: auto;
+	}
 
-    li {
-        p {
-            margin: 0;
-            margin-bottom: 0.25rem;
-        }
-    }
+	li {
+		p {
+			margin: 0;
+			margin-bottom: 0.25rem;
+		}
+	}
 
-    ol,
-    ul {
-        margin-bottom: 40px;
-    }
+	ol,
+	ul {
+		margin-bottom: 40px;
+	}
 
-    pre {
-        padding: 33px 22px;
-        border-radius: 18px;
-        margin-top: 22px;
-        margin-bottom: 22px;
-    }
+	pre {
+		padding: 33px 22px;
+		border-radius: 18px;
+		margin-top: 22px;
+		margin-bottom: 22px;
+	}
 
-    math {
-        font-family: "Libertinus Math", "math";
-        font-size: 1.3rem;
-    }
+	math {
+		font-family: "Libertinus Math", "math";
+		font-size: 1.3rem;
+	}
 
-    p code {
-        font-family: "Fira Code", monospace;
-        font-size: 1rem;
-        line-height: 1;
-        color: var(--text-color-inline-code);
-        background-color: var(--background-color-inline-code);
-        padding: 0.2em 0.25em;
-        border-radius: 0;
-    }
+	p code {
+		font-family: "Fira Code", monospace;
+		font-size: 1rem;
+		line-height: 1;
+		color: var(--text-color-inline-code);
+		background-color: var(--background-color-inline-code);
+		padding: 0.2em 0.25em;
+		border-radius: 0;
+	}
 
-    .anchor-link {
-        font-size: 1.2rem;
-        margin-right: 0.25em;
-        color: var(--text-color-link);
+	.anchor-link {
+		font-size: 1.2rem;
+		margin-right: 0.25em;
+		color: var(--text-color-link);
 
-        &:hover {
-            opacity: 1;
-            text-decoration: underline;
-            color: var(--text-color-link-hover);
-        }
-    }
+		&:hover {
+			opacity: 1;
+			text-decoration: underline;
+			color: var(--text-color-link-hover);
+		}
+	}
 
-    .anchor {
-        scroll-margin-top: 1em;
-    }
+	.anchor {
+		scroll-margin-top: 1em;
+	}
 
-    .astro-code {
-        background-color: black !important;
-        border-radius: 0 !important;
+	.astro-code {
+		background-color: black !important;
+		border-radius: 0 !important;
 
-        padding: 1rem 0.75rem;
+		padding: 1rem 0.75rem;
 
-        & {
-            @media (max-width: 1024px) {
-                margin-left: -0.75rem;
-                margin-right: -0.75rem;
-                tab-size: 2;
-            }
-        }
+		& {
+			@media (max-width: 1024px) {
+				margin-left: -0.75rem;
+				margin-right: -0.75rem;
+				tab-size: 2;
+			}
+		}
 
-        span {
-            font-family: "Fira Code", monospace;
-            font-size: 0.92rem;
-            line-height: 1.4em;
-            & {
-                @media (max-width: 1024px) {
-                    font-size: 0.8rem;
-                }
-            }
-        }
-    }
+		span {
+			font-family: "Fira Code", monospace;
+			font-size: 0.92rem;
+			line-height: 1.4em;
+			& {
+				@media (max-width: 1024px) {
+					font-size: 0.8rem;
+				}
+			}
+		}
+	}
 
-    .aside {
-        padding: 1em;
-        border-left: 5px solid #888;
-        background: #f6f6f6;
-        margin: 1em 0;
+	.aside {
+		padding: 1em;
+		border-left: 5px solid #888;
+		background: #f6f6f6;
+		margin: 1em 0;
 
-        p {
-            margin: 0;
-            color: var(--text-color-aside);
-        }
+		p {
+			margin: 0;
+			color: var(--text-color-aside);
+		}
 
-        a {
-            color: var(--text-color-aside-link);
+		a {
+			color: var(--text-color-aside-link);
 
-            &:hover,
-            &:focus {
-                color: var(--text-color-aside-link-hover);
-            }
-        }
-    }
+			&:hover,
+			&:focus {
+				color: var(--text-color-aside-link-hover);
+			}
+		}
+	}
 
-    .aside::before {
-        font-weight: bold;
-        display: block;
-        margin-bottom: 0.5em;
-        color: var(--text-color-aside);
-    }
+	.aside::before {
+		font-weight: bold;
+		display: block;
+		margin-bottom: 0.5em;
+		color: var(--text-color-aside);
+	}
 
-    .aside.note {
-        border-color: #007acc;
-        background: #e7f3ff;
-    }
+	.aside.note {
+		border-color: #007acc;
+		background: #e7f3ff;
+	}
 
-    .aside.note::before {
-        content: "📝 Note";
-    }
+	.aside.note::before {
+		content: "📝 Note";
+	}
 
-    .aside.tip {
-        border-color: #22c55e;
-        background: #d1fae5;
-    }
+	.aside.tip {
+		border-color: #22c55e;
+		background: #d1fae5;
+	}
 
-    .aside.tip::before {
-        content: "💡 Tip";
-    }
+	.aside.tip::before {
+		content: "💡 Tip";
+	}
 
-    .aside.important {
-        border-color: #9333ea;
-        background: #f3e8ff;
-    }
+	.aside.important {
+		border-color: #9333ea;
+		background: #f3e8ff;
+	}
 
-    .aside.important::before {
-        content: "❗ Important";
-    }
+	.aside.important::before {
+		content: "❗ Important";
+	}
 
-    .aside.warning {
-        border-color: #d97706;
-        background: #fff3cd;
-    }
+	.aside.warning {
+		border-color: #d97706;
+		background: #fff3cd;
+	}
 
-    .aside.warning::before {
-        content: "⚠️ Warning";
-    }
+	.aside.warning::before {
+		content: "⚠️ Warning";
+	}
 
-    .aside.caution {
-        border-color: #b91c1c;
-        background: #fee2e2;
-    }
+	.aside.caution {
+		border-color: #b91c1c;
+		background: #fee2e2;
+	}
 
-    .aside.caution::before {
-        content: "🛑 Caution";
-    }
+	.aside.caution::before {
+		content: "🛑 Caution";
+	}
 
-    .quote {
-        padding: 1em 1.5em;
-        margin: 1.5em 0;
-        border-left: 4px solid #bca9bd;
-        background: #f0f3f2;
-        font-style: italic;
-        color: #000000;
-        position: relative;
+	.quote {
+		padding: 1em 1.5em;
+		margin: 1.5em 0;
+		border-left: 4px solid #bca9bd;
+		background: #f0f3f2;
+		font-style: italic;
+		color: #000000;
+		position: relative;
 
-        p {
-            margin: 0;
-            color: var(--text-color-aside);
-        }
+		p {
+			margin: 0;
+			color: var(--text-color-aside);
+		}
 
-        cite {
-            display: block;
-            margin-top: 0.5em;
-            font-size: 0.875em;
-            text-align: right;
+		cite {
+			display: block;
+			margin-top: 0.5em;
+			font-size: 0.875em;
+			text-align: right;
 
-            &::before {
-                content: "— ";
-            }
-        }
-    }
+			&::before {
+				content: "— ";
+			}
+		}
+	}
 
-    .keyboard {
-        font-family: "Libertinus Keyboard", monospace;
-        font-size: 1.1rem;
-        line-height: 1.2;
-        padding: 0.1em 0.2em;
-    }
+	.keyboard {
+		font-family: "Libertinus Keyboard", monospace;
+		font-size: 1.1rem;
+		line-height: 1.2;
+		padding: 0.1em 0.2em;
+	}
 
-    .mermaid p {
-        color: var(--text-color-aside);
-    }
+	.mermaid p {
+		color: var(--text-color-aside);
+	}
 }

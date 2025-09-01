@@ -8,20 +8,28 @@
 @import url("https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css");
 
 html {
-    font-size: 112.5%;
-    scroll-behavior: smooth;
-    scroll-margin-top: 1em;
-    -webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
+	font-size: 112.5%;
+	scroll-behavior: smooth;
+	scroll-margin-top: 1em;
+	-webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
 }
 
 body {
-    tab-size: 4;
-    font-weight: 400;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial,
-        Noto Sans, sans-serif;
-    background: var(--background-color);
-    color: var(--text-color);
-    text-rendering: optimizeLegibility;
+	tab-size: 4;
+	font-weight: 400;
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		Segoe UI,
+		Roboto,
+		Helvetica Neue,
+		Arial,
+		Noto Sans,
+		sans-serif;
+	background: var(--background-color);
+	color: var(--text-color);
+	text-rendering: optimizeLegibility;
 }
 
 h1,
@@ -30,29 +38,37 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial,
-        Noto Sans, sans-serif;
-    color: var(--text-color);
-    margin: 0em;
+	font-family:
+		ui-sans-serif,
+		system-ui,
+		-apple-system,
+		Segoe UI,
+		Roboto,
+		Helvetica Neue,
+		Arial,
+		Noto Sans,
+		sans-serif;
+	color: var(--text-color);
+	margin: 0em;
 }
 
 .post-header {
-    margin-top: 40px;
-    margin-bottom: 40px;
-    width: 100%;
+	margin-top: 40px;
+	margin-bottom: 40px;
+	width: 100%;
 }
 
 @media (max-width: 1024px) {
-    .content {
-        p {
-            font-size: 1rem;
+	.content {
+		p {
+			font-size: 1rem;
 
-            code {
-                font-size: 0.75rem;
-            }
-        }
-        .astro-code span {
-            font-size: 0.7rem;
-        }
-    }
+			code {
+				font-size: 0.75rem;
+			}
+		}
+		.astro-code span {
+			font-size: 0.7rem;
+		}
+	}
 }
