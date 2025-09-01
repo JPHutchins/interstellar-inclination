@@ -11,6 +11,7 @@ import remarkDirective from "remark-directive";
 import rehypeAside from "./src/utils/rehype-aside.ts";
 import sitemap from "@astrojs/sitemap";
 import { mermaid } from "./src/plugins/mermaid";
+import { remarkTabbedCode } from "./src/plugins/remark-tabbed-code.ts";
 
 // https://astro.build/config
 export default defineConfig({
@@ -26,6 +27,7 @@ export default defineConfig({
             mermaid,
             remarkGfm,
             remarkDirective,
+            remarkTabbedCode,
             remarkMath,
             [remarkToc, { heading: "Table of Contents", maxDepth: 3 }],
         ],

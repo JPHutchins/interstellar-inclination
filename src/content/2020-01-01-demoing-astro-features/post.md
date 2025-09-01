@@ -260,3 +260,71 @@ fn main() {
 	println!("{} -> {}", boolean, binary);
 }
 ```
+
+## Tabbed Code Blocks
+
+Compare enum implementations across different languages:
+
+```
+:::tabbed-code
+'''c tab="C"
+enum color {
+	COLOR_RED = 0,
+	COLOR_GREEN,
+	COLOR_BLUE,
+};
+'''
+
+'''rust tab="Rust"
+enum Color {
+	Red,
+	Green, 
+	Blue,
+}
+'''
+
+'''typescript tab="TypeScript"
+enum Color {
+	Red,
+	Green,
+	Blue,
+}
+'''
+
+'''python tab="A longer description"
+def f(a: int) -> int
+	return a * 2 # a really long comment that will force this to scroll on any display width, at least that's the hope!
+'''
+:::
+```
+
+:::tabbed-code
+```c tab="C"
+enum color {
+	COLOR_RED = 0,
+	COLOR_GREEN,
+	COLOR_BLUE,
+};
+```
+
+```rust tab="Rust"
+enum Color {
+	Red,
+	Green, 
+	Blue,
+}
+```
+
+```typescript tab="TypeScript"
+enum Color {
+	Red,
+	Green,
+	Blue,
+}
+```
+
+```python tab="A longer description"
+def f(a: int) -> int
+	return a * 2 # a really long comment that will force this to scroll on any display width, at least that's the hope!
+```
+:::

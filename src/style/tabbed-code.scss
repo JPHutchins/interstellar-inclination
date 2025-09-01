@@ -1,0 +1,69 @@
+.tabbed-code-container {
+    margin-top: 22px;
+    margin-bottom: 22px;
+}
+
+.tab-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    background: #1a1a1a;
+    overflow: hidden;
+}
+
+.tab-button {
+    background: #333;
+    color: #ccc;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: "Fira Code", monospace;
+    font-size: 0.8rem;
+    border-right: 1px solid #555;
+    flex-shrink: 0;
+
+    &:hover {
+        background: #444;
+        color: #fff;
+    }
+
+    &.active {
+        background: black;
+        color: #fff;
+    }
+
+    &:last-child {
+        border-right: none;
+    }
+}
+
+.tab-content {
+    position: relative;
+}
+
+.tab-pane {
+    display: none;
+
+    &.active {
+        display: block;
+    }
+}
+
+.tabbed-code-container .astro-code {
+    margin: 0;
+}
+
+@media (max-width: 1024px) {
+    .tabbed-code-container {
+        margin-left: -0.75rem;
+        margin-right: -0.75rem;
+    }
+
+    .tab-buttons {
+        border-radius: 0;
+    }
+
+    .tabbed-code-container .astro-code {
+        border-radius: 0;
+        tab-size: 2;
+    }
+}
