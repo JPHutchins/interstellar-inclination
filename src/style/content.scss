@@ -1,4 +1,8 @@
 .post-date {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	row-gap: 0.4rem;
 	margin-top: 0.5rem;
 	font-size: 1rem;
 	font-family:
@@ -11,6 +15,11 @@
 		Arial,
 		Noto Sans,
 		sans-serif;
+}
+
+.meta-sep {
+	margin: 0 0.4rem;
+	opacity: 0.6;
 }
 
 .post-header {

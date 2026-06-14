@@ -1,6 +1,8 @@
 ---
 import type { Post } from "@data/post";
 import Date from "@components/utilities/Date";
+import ReadingTime from "@components/blog/ReadingTime";
+import Tags from "@components/blog/Tags";
 const post: Post = Astro.props.post;
 const icon = post.icon ?? "/crumpledpaper_100x100.png";
 ---
@@ -17,6 +19,10 @@ const icon = post.icon ?? "/crumpledpaper_100x100.png";
 </div>
 <div class="post-date">
 	<Date date={post.date} />
+	<span class="meta-sep" aria-hidden="true">·</span>
+	<ReadingTime minutes={post.readMinutes} />
+	{post.tags.length > 0 && <span class="meta-sep" aria-hidden="true">·</span>}
+	<Tags tags={post.tags} />
 </div>
 <p>{post.preview}</p>
 

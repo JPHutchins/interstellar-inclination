@@ -1,0 +1,15 @@
+---
+interface Props {
+	minutes: number;
+}
+
+const { minutes } = Astro.props;
+---
+
+<span class="reading-time">{minutes} min read</span>
+
+<style>
+	.reading-time {
+		white-space: nowrap;
+	}
+</style>

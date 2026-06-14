@@ -1,0 +1,16 @@
+// Shared "pill" shape for tag chips (Tags.astro) and filter buttons (TagFilter.astro).
+@mixin pill {
+	line-height: 1;
+	border-radius: 999px;
+	border: 1px solid var(--text-color-link);
+	color: var(--text-color-link);
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+
+	&:hover,
+	&:focus-visible {
+		background-color: var(--text-color-link);
+		color: var(--background-color);
+	}
+}

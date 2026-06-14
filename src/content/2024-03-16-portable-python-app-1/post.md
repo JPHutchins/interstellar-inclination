@@ -2,6 +2,7 @@
 title: Building a Universally Portable Python App
 author: JP Hutchins
 date: 2024-03-16
+tags: [python, packaging]
 icon: /python.png
 preview: |
     The introductory post of a series about designing, building, and sharing
