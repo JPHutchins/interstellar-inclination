@@ -1,6 +1,8 @@
 ---
 import Blog from "@layouts/blog";
 import Date from "@components/utilities/Date";
+import ReadingTime from "@components/blog/ReadingTime";
+import Tags from "@components/blog/Tags";
 import { published, getRSS, drafted } from "@data/post";
 import { getPosts } from "src/utils/get-posts";
 import type { GetStaticPaths } from "astro";
@@ -26,7 +28,10 @@ const year = new Intl.DateTimeFormat("en-US", {
 		<h1 class="post-title">{post.title}</h1>
 		<div class="post-date">
 			<Date date={post.date} />
+			<span class="meta-sep" aria-hidden="true">·</span>
+			<ReadingTime minutes={post.readMinutes} />
 		</div>
+		<Tags tags={post.tags} />
 	</div>
 	<div class="content container">
 		{

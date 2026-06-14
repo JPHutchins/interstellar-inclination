@@ -2,6 +2,7 @@
 title: Comparing Firmware Development Environments
 author: JP Hutchins
 date: 2024-10-10
+tags: [firmware, tooling]
 emoji: 🛠️
 preview: |
     A comparison of developer experience and toolchain performance in Window 11,

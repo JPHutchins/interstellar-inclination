@@ -2,6 +2,7 @@
 title: Astro Demo
 author: JP Hutchins
 date: 2020-01-01
+tags: [astro, demo]
 icon: /Astro.png
 preview: |
   Demoing some of the Astro features like asides, semantic quotes/cites, math,

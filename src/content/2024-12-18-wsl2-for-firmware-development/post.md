@@ -2,6 +2,7 @@
 title: WSL2 for Firmware Development
 author: JP Hutchins
 date: 2024-12-18
+tags: [firmware, wsl, tooling]
 icon: /wsl.png
 preview: |
     This guide provides instructions for setting up an environment for developing,

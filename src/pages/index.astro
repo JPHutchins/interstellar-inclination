@@ -2,9 +2,11 @@
 import { published } from "@data/post";
 import Blog from "@layouts/blog";
 import Preview from "@components/blog/preview";
+import TagFilter from "@components/blog/TagFilter";
 import { getPosts } from "src/utils/get-posts";
 
 const posts = published(await getPosts());
+const allTags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) => a.localeCompare(b));
 ---
 
 <Blog title="Crumpled Paper">
@@ -12,6 +14,84 @@ const posts = published(await getPosts());
 		<h1 class="post-title">Posts</h1>
 	</div>
 	<div class="content container">
-		{posts.map((post) => <Preview post={post} />)}
+		<TagFilter tags={allTags} />
+		<div class="post-list">
+			{
+				posts.map((post) => (
+					<article class="post-preview" data-tags={post.tags.join(" ")}>
+						<Preview post={post} />
+					</article>
+				))
+			}
+		</div>
+		<p class="no-results" hidden>No posts match the selected tags.</p>
 	</div>
 </Blog>
+
+<script>
+	const pills = Array.from(document.querySelectorAll<HTMLButtonElement>(".filter-pill"));
+	const previews = Array.from(document.querySelectorAll<HTMLElement>(".post-preview"));
+	const noResults = document.querySelector<HTMLElement>(".no-results");
+
+	const tagsOf = (el: HTMLElement): string[] =>
+		(el.dataset.tags ?? "").split(" ").filter(Boolean);
+
+	const readActive = (): Set<string> => {
+		const param = new URLSearchParams(location.search).get("tag");
+		return new Set(
+			param
+				? param
+						.split(",")
+						.map((tag) => tag.trim())
+						.filter(Boolean)
+				: [],
+		);
+	};
+
+	const active = readActive();
+
+	const syncUrl = (): void => {
+		const params = new URLSearchParams(location.search);
+		if (active.size === 0) params.delete("tag");
+		else params.set("tag", [...active].join(","));
+		const query = params.toString();
+		history.replaceState(
+			null,
+			"",
+			query ? `?${query}${location.hash}` : `${location.pathname}${location.hash}`,
+		);
+	};
+
+	const apply = (): void => {
+		previews.forEach((preview) => {
+			preview.hidden = active.size > 0 && !tagsOf(preview).some((tag) => active.has(tag));
+		});
+		pills.forEach((pill) => {
+			const tag = pill.dataset.tag ?? "";
+			const on = tag === "" ? active.size === 0 : active.has(tag);
+			pill.classList.toggle("is-active", on);
+			pill.setAttribute("aria-pressed", String(on));
+		});
+		if (noResults) noResults.hidden = previews.some((preview) => !preview.hidden);
+	};
+
+	const toggle = (tag: string): void => {
+		if (tag === "") active.clear();
+		else if (active.has(tag)) active.delete(tag);
+		else active.add(tag);
+		syncUrl();
+		apply();
+	};
+
+	pills.forEach((pill) => pill.addEventListener("click", () => toggle(pill.dataset.tag ?? "")));
+
+	document.querySelector(".post-list")?.addEventListener("click", (event) => {
+		const chip = (event.target as HTMLElement).closest<HTMLAnchorElement>("a.tag[data-tag]");
+		if (!chip) return;
+		event.preventDefault();
+		toggle(chip.dataset.tag ?? "");
+		window.scrollTo({ top: 0, behavior: "smooth" });
+	});
+
+	apply();
+</script>

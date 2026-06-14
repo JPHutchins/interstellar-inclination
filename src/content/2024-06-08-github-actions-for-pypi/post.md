@@ -2,6 +2,7 @@
 title: GitHub Actions for the Python Package Index
 author: JP Hutchins
 date: 2024-06-08
+tags: [python, ci-cd, security]
 icon: /python.png
 preview: |
     A tutorial on mitigating security threats when distributing Python packages.

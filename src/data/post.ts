@@ -1,5 +1,6 @@
 type MarkdownInstance = import("astro").MarkdownInstance<any>;
 import { createHash } from "crypto";
+import readingTime from "reading-time";
 const { MODE } = import.meta.env;
 
 export type Post = {
@@ -12,6 +13,8 @@ export type Post = {
 	date: string;
 	file: URL;
 	Content: string;
+	tags: string[];
+	readMinutes: number;
 	icon?: string;
 	emoji?: string;
 };
@@ -22,6 +25,18 @@ function obfuscatedPath(str: string): string {
 
 const isDraft = (post: MarkdownInstance): boolean => post.file.split("/").reverse()[2] === "drafts";
 
+const tagsOf = (post: MarkdownInstance): string[] =>
+	Array.isArray(post.frontmatter.tags)
+		? [
+				...new Set(
+					post.frontmatter.tags.map((tag: unknown) => String(tag).trim()).filter(Boolean),
+				),
+			]
+		: [];
+
+const readMinutesOf = (post: MarkdownInstance): number =>
+	Math.max(1, Math.ceil(readingTime(post.rawContent()).minutes));
+
 const singlePublished = (post: MarkdownInstance): Post => ({
 	...post.frontmatter,
 	Content: post.Content,
@@ -31,6 +46,8 @@ const singlePublished = (post: MarkdownInstance): Post => ({
 			: post.file.split("/").reverse()[1],
 	draft: isDraft(post),
 	timestamp: new Date(post.frontmatter.date).valueOf(),
+	tags: tagsOf(post),
+	readMinutes: readMinutesOf(post),
 });
 
 export const published = (posts: MarkdownInstance[]): Post[] =>
@@ -46,6 +63,8 @@ const singleDrafted = (post: MarkdownInstance): Post => ({
 	slug: obfuscatedPath(post.file),
 	draft: isDraft(post),
 	timestamp: new Date(post.frontmatter.date).valueOf(),
+	tags: tagsOf(post),
+	readMinutes: readMinutesOf(post),
 });
 
 export const drafted = (posts: MarkdownInstance[]): Post[] =>
