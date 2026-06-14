@@ -1,0 +1,175 @@
+---
+/**
+ * Raw-data tables for the struct-profiling post, rendered straight from the
+ * single source of truth in `@data/struct-charts` (the same `CONSTRUCTS` the
+ * charts derive from). Drop `<StructData />` into the methodology section; the
+ * tables can never disagree with the figures because both read one array.
+ */
+import { CONSTRUCTS, crossover } from "@data/struct-charts";
+
+const strip = (s: string) => s.replace(/<br\/?>/g, " ");
+
+type Variant = (typeof CONSTRUCTS)[number]["frozen"];
+type Row = { construct: string; variant: string; v: Variant };
+
+// One row per (construct, variant); NamedTuple has no mutable form.
+const rows: Row[] = CONSTRUCTS.flatMap((c) => [
+	...(c.mutable ? [{ construct: strip(c.tableLabel), variant: "mutable", v: c.mutable }] : []),
+	{ construct: strip(c.tableLabel), variant: "frozen", v: c.frozen },
+]);
+
+const num = (x: number | null, digits = 1) => (x === null ? "—" : x.toFixed(digits));
+const int = (x: number | null) => (x === null ? "—" : String(x));
+const bc = (x: number | "C") => (x === "C" ? "C" : String(x));
+---
+
+<div class="struct-data">
+	<p class="struct-data__cap">
+		<strong>Table 1 — Import / type-creation cost</strong>, µs per class (median of 5 fresh
+		<code>-X importtime</code> runs, K = 200). <em>mypyc</em> is the compiled <code>.so</code>;
+		“—” means the construct is off the compiled axis (attrs, msgspec, and both record-types are
+		defined outside the compiled module; <code>record-type (C)</code> is already a C extension).
+	</p>
+	<table>
+		<thead>
+			<tr><th>construct</th><th>variant</th><th>warm</th><th>cold</th><th>mypyc</th></tr>
+		</thead>
+		<tbody>
+			{rows.map((r) => (
+				<tr>
+					<td>{r.construct}</td>
+					<td>{r.variant}</td>
+					<td>{num(r.v.importUs.warm)}</td>
+					<td>{num(r.v.importUs.cold)}</td>
+					<td>{num(r.v.importUs.mypyc)}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+
+	<p class="struct-data__cap">
+		<strong>Table 2 — One-time dependency import</strong>, milliseconds cumulative in a fresh
+		interpreter. Paid once per process regardless of how many types you define. The native
+		record imports no library.
+	</p>
+	<table>
+		<thead>
+			<tr><th>library</th><th>warm</th><th>cold</th></tr>
+		</thead>
+		<tbody>
+			{CONSTRUCTS.map((c) => (
+				<tr>
+					<td>{strip(c.depLabel)}</td>
+					<td>{num(c.depMs.warm)}</td>
+					<td>{num(c.depMs.cold)}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+
+	<p class="struct-data__cap">
+		<strong>Table 3 — Per-instance memory</strong>, bytes (tracemalloc, GC header included).
+		Freezing never changes the footprint; mypyc adds one 8-byte vtable word to the native
+		classes it compiles.
+	</p>
+	<table>
+		<thead>
+			<tr><th>construct</th><th>variant</th><th>interpreted</th><th>mypyc</th></tr>
+		</thead>
+		<tbody>
+			{rows.map((r) => (
+				<tr>
+					<td>{r.construct}</td>
+					<td>{r.variant}</td>
+					<td>{int(r.v.memBytes.interp)}</td>
+					<td>{int(r.v.memBytes.mypyc)}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+
+	<p class="struct-data__cap">
+		<strong>Table 4 — Instantiation</strong>, nanoseconds (min of 7 timeit repeats of 1e6
+		iterations). The timeit loop is interpreted, so a compiled class called from it shows no
+		mypyc speedup — and can read <em>noticeably</em> slower from the per-call interpreter↔native
+		boundary (e.g. mutable dataclass 87.5→109.5). Treat these as ±10%; the construct-to-construct
+		shape is the robust signal, not small interpreted-vs-mypyc deltas.
+	</p>
+	<table>
+		<thead>
+			<tr><th>construct</th><th>variant</th><th>interpreted</th><th>mypyc</th></tr>
+		</thead>
+		<tbody>
+			{rows.map((r) => (
+				<tr>
+					<td>{r.construct}</td>
+					<td>{r.variant}</td>
+					<td>{num(r.v.instNs.interp)}</td>
+					<td>{num(r.v.instNs.mypyc)}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+
+	<p class="struct-data__cap">
+		<strong>Table 5 — Construction bytecode</strong>, instruction counts from <code>dis</code>.
+		“C” = no Python bytecode (C-level). Freezing is what turns the 9-instruction
+		<code>__init__</code> into 25 (every field routed through <code>object.__setattr__</code>);
+		these counts are unchanged inside the compiled module except the native
+		<code>__init__</code>, which mypyc lowers to C.
+	</p>
+	<table>
+		<thead>
+			<tr><th>construct</th><th><code>__new__</code></th><th><code>__init__</code> (mutable)</th><th><code>__init__</code> (frozen)</th></tr>
+		</thead>
+		<tbody>
+			{CONSTRUCTS.map((c) => (
+				<tr>
+					<td>{strip(c.tableLabel)}</td>
+					<td>{bc(c.newBytecode)}</td>
+					<td>{c.mutable ? bc(c.mutable.initBytecode) : "—"}</td>
+					<td>{bc(c.frozen.initBytecode)}</td>
+				</tr>
+			))}
+		</tbody>
+	</table>
+
+	<p class="struct-data__cap">
+		Derived: the NamedTuple ↔ msgspec startup crossover sits at <strong>{crossover.warm.toLocaleString()}</strong>
+		types (warm) and <strong>{crossover.cold.toLocaleString()}</strong> types (cold), computed
+		from Tables 1 and 2.
+	</p>
+</div>
+
+<style>
+	.struct-data {
+		margin: 2rem 0;
+		font-size: 0.9rem;
+	}
+	.struct-data table {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 0.5rem 0 1.5rem;
+	}
+	.struct-data th,
+	.struct-data td {
+		padding: 0.3rem 0.6rem;
+		border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+		text-align: right;
+	}
+	.struct-data th:first-child,
+	.struct-data td:first-child,
+	.struct-data th:nth-child(2),
+	.struct-data td:nth-child(2) {
+		text-align: left;
+	}
+	.struct-data thead th {
+		border-bottom: 2px solid var(--border-color, rgba(128, 128, 128, 0.4));
+		font-weight: 600;
+	}
+	.struct-data__cap {
+		font-size: 0.85rem;
+		color: var(--text-color-alt);
+		margin-bottom: 0;
+	}
+</style>

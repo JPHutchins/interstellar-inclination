@@ -17,7 +17,11 @@ import { remarkTabbedCode } from "./src/plugins/remark-tabbed-code.ts";
 export default defineConfig({
 	site: "https://www.crumpledpaper.tech",
 	integrations: [
-		mdx(),
+		// extendMarkdownConfig inherits the remark/rehype plugins from `markdown`
+		// below, but with custom rehypePlugins present the MDX pipeline drops
+		// Astro's default Shiki step — so set syntaxHighlight explicitly, or .mdx
+		// code fences render unhighlighted (plain <pre>) while .md ones don't.
+		mdx({ extendMarkdownConfig: true, syntaxHighlight: "shiki" }),
 		sitemap({
 			filter: (page) => page.search("draft-") === -1,
 		}),

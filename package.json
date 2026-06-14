@@ -15,6 +15,7 @@
 		"astro": "^5.1.7",
 		"astro-expressive-code": "^0.40.2",
 		"mermaid": "^11.4.1",
+		"plotly.js-dist-min": "^3.6.0",
 		"reading-time": "^1.5.0",
 		"rehype-autolink-headings": "^7.1.0",
 		"rehype-external-links": "^3.0.0",
@@ -32,7 +33,9 @@
 		"useTabs": true,
 		"tabWidth": 4,
 		"bracketSameLine": false,
-		"plugins": ["prettier-plugin-astro"],
+		"plugins": [
+			"prettier-plugin-astro"
+		],
 		"overrides": [
 			{
 				"files": "*.astro",

@@ -1,5 +1,6 @@
 type MarkdownInstance = import("astro").MarkdownInstance<any>;
 import { createHash } from "crypto";
+import { readFileSync } from "fs";
 import readingTime from "reading-time";
 const { MODE } = import.meta.env;
 
@@ -34,8 +35,13 @@ const tagsOf = (post: MarkdownInstance): string[] =>
 			]
 		: [];
 
+// .md exposes rawContent(); .mdx does not, so fall back to reading the source
+// file (post.file is an absolute path) — keeps reading-time working for both.
+const rawOf = (post: MarkdownInstance): string =>
+	typeof post.rawContent === "function" ? post.rawContent() : readFileSync(post.file, "utf-8");
+
 const readMinutesOf = (post: MarkdownInstance): number =>
-	Math.max(1, Math.ceil(readingTime(post.rawContent()).minutes));
+	Math.max(1, Math.ceil(readingTime(rawOf(post)).minutes));
 
 const singlePublished = (post: MarkdownInstance): Post => ({
 	...post.frontmatter,
