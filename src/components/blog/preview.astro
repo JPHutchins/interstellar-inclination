@@ -21,9 +21,10 @@ const icon = post.icon ?? "/crumpledpaper_100x100.png";
 	<Date date={post.date} />
 	<span class="meta-sep" aria-hidden="true">·</span>
 	<ReadingTime minutes={post.readMinutes} />
+	{post.tags.length > 0 && <span class="meta-sep" aria-hidden="true">·</span>}
+	<Tags tags={post.tags} />
 </div>
 <p>{post.preview}</p>
-<Tags tags={post.tags} />
 
 <style>
 	h2 {

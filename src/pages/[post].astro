@@ -30,8 +30,9 @@ const year = new Intl.DateTimeFormat("en-US", {
 			<Date date={post.date} />
 			<span class="meta-sep" aria-hidden="true">·</span>
 			<ReadingTime minutes={post.readMinutes} />
+			{post.tags.length > 0 && <span class="meta-sep" aria-hidden="true">·</span>}
+			<Tags tags={post.tags} />
 		</div>
-		<Tags tags={post.tags} />
 	</div>
 	<div class="content container">
 		{
