@@ -14,14 +14,16 @@ const { tags } = Astro.props;
 			</button>
 			{tags.map((tag) => (
 				<button type="button" class="filter-pill" data-tag={tag} aria-pressed="false">
-					#{tag}
+					{tag}
 				</button>
 			))}
 		</div>
 	) : null
 }
 
-<style>
+<style lang="scss">
+	@use "../../style/pill" as *;
+
 	.tag-filter {
 		display: flex;
 		flex-wrap: wrap;
@@ -30,28 +32,16 @@ const { tags } = Astro.props;
 	}
 
 	.filter-pill {
+		@include pill;
 		font-size: 0.85rem;
-		line-height: 1;
 		padding: 0.45em 0.7em;
-		border-radius: 999px;
-		border: 1px solid var(--text-color-link);
 		background: transparent;
-		color: var(--text-color-link);
 		cursor: pointer;
-		transition:
-			background-color 0.15s ease,
-			color 0.15s ease;
-	}
 
-	.filter-pill:hover,
-	.filter-pill:focus-visible {
-		background-color: var(--text-color-link);
-		color: var(--background-color);
-	}
-
-	.filter-pill.is-active {
-		background-color: var(--text-color-link);
-		color: var(--background-color);
-		font-weight: bold;
+		&.is-active {
+			background-color: var(--text-color-link);
+			color: var(--background-color);
+			font-weight: bold;
+		}
 	}
 </style>

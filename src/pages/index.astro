@@ -18,7 +18,7 @@ const allTags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) => 
 		<div class="post-list">
 			{
 				posts.map((post) => (
-					<article class="post-preview" data-tags={post.tags.join(" ")}>
+					<article class="post-preview" data-tags={JSON.stringify(post.tags)}>
 						<Preview post={post} />
 					</article>
 				))
@@ -33,8 +33,7 @@ const allTags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) => 
 	const previews = Array.from(document.querySelectorAll<HTMLElement>(".post-preview"));
 	const noResults = document.querySelector<HTMLElement>(".no-results");
 
-	const tagsOf = (el: HTMLElement): string[] =>
-		(el.dataset.tags ?? "").split(" ").filter(Boolean);
+	const tagsOf = (el: HTMLElement): string[] => JSON.parse(el.dataset.tags ?? "[]");
 
 	const readActive = (): Set<string> => {
 		const param = new URLSearchParams(location.search).get("tag");

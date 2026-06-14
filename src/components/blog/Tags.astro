@@ -13,7 +13,7 @@ const { tags, base = "/?tag=" } = Astro.props;
 			{tags.map((tag) => (
 				<li>
 					<a class="tag" href={`${base}${encodeURIComponent(tag)}`} data-tag={tag}>
-						#{tag}
+						{tag}
 					</a>
 				</li>
 			))}
@@ -21,7 +21,9 @@ const { tags, base = "/?tag=" } = Astro.props;
 	) : null
 }
 
-<style>
+<style lang="scss">
+	@use "../../style/pill" as *;
+
 	.tags {
 		list-style: none;
 		display: flex;
@@ -32,22 +34,10 @@ const { tags, base = "/?tag=" } = Astro.props;
 	}
 
 	.tag {
+		@include pill;
 		display: inline-block;
 		font-size: 0.8rem;
-		line-height: 1;
 		padding: 0.35em 0.6em;
-		border-radius: 999px;
-		border: 1px solid var(--text-color-link);
-		color: var(--text-color-link);
 		text-decoration: none;
-		transition:
-			background-color 0.15s ease,
-			color 0.15s ease;
-	}
-
-	.tag:hover,
-	.tag:focus-visible {
-		background-color: var(--text-color-link);
-		color: var(--background-color);
 	}
 </style>
