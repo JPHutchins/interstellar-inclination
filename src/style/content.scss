@@ -163,89 +163,92 @@
 
 	.aside {
 		padding: 1em;
-		border-left: 5px solid #888;
-		background: #f6f6f6;
+		padding-left: 2em;
+		border-left: 2px solid #888;
 		margin: 1em 0;
+		background-color: var(--background-color-aside);
 
-		p {
-			margin: 0;
-			color: var(--text-color-aside);
-		}
-
-		a {
-			color: var(--text-color-aside-link);
-
-			&:hover,
-			&:focus {
-				color: var(--text-color-aside-link-hover);
+		& {
+			@media (max-width: 1024px) {
+				margin-left: -0.75rem;
+				margin-right: -0.75rem;
+				padding-left: 0.75rem;
 			}
 		}
 	}
 
 	.aside::before {
-		font-weight: bold;
+		font-family: "Material Symbols Outlined";
+		font-weight: normal;
+		font-variation-settings:
+			"FILL" 0,
+			"wght" 400,
+			"GRAD" 0,
+			"opsz" 24;
+		font-size: 1.25em;
 		display: block;
 		margin-bottom: 0.5em;
-		color: var(--text-color-aside);
 	}
 
 	.aside.note {
 		border-color: #007acc;
-		background: #e7f3ff;
 	}
 
 	.aside.note::before {
-		content: "📝 Note";
+		content: "info";
+		color: #007acc;
 	}
 
 	.aside.tip {
 		border-color: #22c55e;
-		background: #d1fae5;
 	}
 
 	.aside.tip::before {
-		content: "💡 Tip";
+		content: "lightbulb";
+		color: #22c55e;
 	}
 
 	.aside.important {
 		border-color: #9333ea;
-		background: #f3e8ff;
 	}
 
 	.aside.important::before {
-		content: "❗ Important";
+		content: "flag";
+		color: #9333ea;
 	}
 
 	.aside.warning {
 		border-color: #d97706;
-		background: #fff3cd;
 	}
 
 	.aside.warning::before {
-		content: "⚠️ Warning";
+		content: "warning";
+		color: #d97706;
 	}
 
 	.aside.caution {
 		border-color: #b91c1c;
-		background: #fee2e2;
 	}
 
 	.aside.caution::before {
-		content: "🛑 Caution";
+		content: "dangerous";
+		color: #b91c1c;
 	}
 
 	.quote {
-		padding: 1em 1.5em;
-		margin: 1.5em 0;
-		border-left: 4px solid #bca9bd;
-		background: #f0f3f2;
-		font-style: italic;
-		color: #000000;
+		padding: 1em;
+		margin: 1em 0;
+		padding-left: 2em;
+		border-left: 2px solid #bca9bd;
+		background-color: var(--background-color-aside);
 		position: relative;
 
-		p {
-			margin: 0;
-			color: var(--text-color-aside);
+		& {
+			@media (max-width: 1024px) {
+				margin-left: -0.75rem;
+				margin-right: -0.75rem;
+				padding-left: 0.75rem;
+			}
 		}
 
 		cite {
@@ -260,6 +263,10 @@
 		}
 	}
 
+	.quote:has(cite) {
+		font-style: italic;
+	}
+
 	.keyboard {
 		font-family: "Libertinus Keyboard", monospace;
 		font-size: 1.1rem;
@@ -268,6 +275,6 @@
 	}
 
 	.mermaid p {
-		color: var(--text-color-aside);
+		color: var(--text-color);
 	}
 }

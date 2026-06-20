@@ -1,13 +1,11 @@
 :root {
 	--background-color: hsl(43, 51%, 92%);
+	--background-color-aside: hsl(43, 32%, 87%);
 	--turquoise: #35cf9f;
 
 	--root-text-color: rgb(58, 75, 75);
 	--root-text-color-link: #185e48;
 	--root-text-color-link-hover: #00af78;
-	--text-color-aside: var(--root-text-color);
-	--text-color-aside-link: var(--root-text-color-link);
-	--text-color-aside-link-hover: var(--root-text-color-link-hover);
 }
 
 [data-theme="light"] {
@@ -24,7 +22,8 @@
 [data-theme="dark"] {
 	--background-color-alt: hsl(168, 15%, 13%);
 	--background-color-inline-code: hsl(171, 48%, 5%);
-	--background-color: hsl(180, 8%, 9%);
+	--background-color: hsl(180, 7%, 5%);
+	--background-color-aside: hsl(90, 7%, 8%);
 	--text-color-header: white;
 	--text-color: hsl(99, 21%, 87%);
 	--text-color-inline-code: white;

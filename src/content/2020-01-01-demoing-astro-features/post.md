@@ -152,6 +152,17 @@ graph TB
     class di orange
 ```
 
+## Aside
+
+```markdown
+> A plain aside block.
+>
+> Yep, paragraphs work.
+```
+> A plain aside block.
+>
+> Yep, paragraphs work.
+
 ## Semantic Blockquote & Cite
 
 ```markdown
