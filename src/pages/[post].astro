@@ -43,8 +43,8 @@ const postUrl = new URL(post.slug, Astro.site).href;
 					)
 				}
 				<Tags tags={post.tags} />
-				<p>All posts written without LLM assistance unless otherwise noted.</p>
 			</div>
+			<p class="llm-note">All posts written without LLM assistance unless otherwise noted.</p>
 		</div>
 		<div class="content container">
 			{
