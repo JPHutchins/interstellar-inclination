@@ -24,7 +24,10 @@ export default defineConfig({
 		// code fences render unhighlighted (plain <pre>) while .md ones don't.
 		mdx({ extendMarkdownConfig: true, syntaxHighlight: "shiki" }),
 		sitemap({
-			filter: (page) => page.search("draft-") === -1,
+			filter: (page) =>
+				page.search("draft-") === -1 &&
+				!page.endsWith("/rss.xml") &&
+				!page.endsWith("/atom.xml"),
 		}),
 	],
 	markdown: {

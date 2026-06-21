@@ -15,16 +15,22 @@ const icon = post.icon ?? "/crumpledpaper_100x100.png";
 			<img src={icon} alt="Article icon" class="article-icon" />
 		)
 	}
-	<h2><a href={`/${post.slug}`}>{post.title}</a></h2>
+	<h2><a class="u-url p-name" href={`/${post.slug}`}>{post.title}</a></h2>
 </div>
 <div class="post-date">
-	<Date date={post.date} />
+	<Date date={post.date} class="dt-published" />
 	<span class="meta-sep" aria-hidden="true">·</span>
 	<ReadingTime minutes={post.readMinutes} />
-	{post.tags.length > 0 && <span class="meta-sep" aria-hidden="true">·</span>}
+	{
+		post.tags.length > 0 && (
+			<span class="meta-sep" aria-hidden="true">
+				·
+			</span>
+		)
+	}
 	<Tags tags={post.tags} />
 </div>
-<p>{post.preview}</p>
+<p class="p-summary">{post.preview}</p>
 
 <style>
 	h2 {

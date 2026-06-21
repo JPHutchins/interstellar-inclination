@@ -1,0 +1,153 @@
+.responses {
+	margin-top: 3rem;
+	margin-bottom: 3rem;
+}
+
+.responses-title {
+	font-size: 1.6rem;
+	margin-bottom: 0.25rem;
+}
+
+.responses-disclaimer {
+	color: var(--text-color-alt);
+	font-size: 0.9rem;
+	border-left: 3px solid var(--turquoise);
+	padding-left: 0.75rem;
+	margin: 0.5rem 0 1.25rem;
+}
+
+.responses-details {
+	margin-top: 0.5rem;
+}
+
+.responses-summary {
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	width: fit-content;
+	padding: 0.4rem 0.9rem;
+	font-weight: bold;
+	border: 2px solid var(--turquoise);
+	border-radius: 8px;
+	list-style: none;
+	user-select: none;
+}
+
+.responses-summary:focus-visible {
+	outline: 2px solid var(--text-color);
+	outline-offset: 2px;
+}
+
+.responses-summary::-webkit-details-marker {
+	display: none;
+}
+
+.responses-summary::before {
+	content: "▸";
+	display: inline-block;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.responses-summary::before {
+		transition: transform 0.15s ease;
+	}
+}
+
+.responses-details[open] .responses-summary::before {
+	transform: rotate(90deg);
+}
+
+.responses-channels {
+	margin-top: 1.5rem;
+}
+
+.responses-channel {
+	margin-bottom: 2.5rem;
+}
+
+.responses-channel-title,
+.webmentions-title {
+	font-size: 1.2rem;
+	margin-bottom: 0.75rem;
+	padding-bottom: 0.25rem;
+	border-bottom: 2px solid var(--turquoise);
+}
+
+.webmentions-empty {
+	color: var(--text-color-alt);
+}
+
+.facepile {
+	list-style: none;
+	padding: 0;
+	margin: 0 0 1.25rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3rem;
+
+	img {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		object-fit: cover;
+		display: block;
+	}
+}
+
+.webmention-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+}
+
+.webmention {
+	background: var(--background-color-aside);
+	border-radius: 8px;
+	padding: 1rem 1.25rem;
+}
+
+.webmention-author {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: bold;
+	text-decoration: none;
+	color: var(--text-color);
+
+	img {
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+}
+
+.webmention-body {
+	margin: 0.6rem 0 0;
+
+	> :last-child {
+		margin-bottom: 0;
+	}
+}
+
+.webmention-source {
+	display: inline-block;
+	margin-top: 0.5rem;
+	font-size: 0.8rem;
+	color: var(--text-color-alt);
+}
+
+.webmentions-cta {
+	margin-top: 1.25rem;
+	color: var(--text-color-alt);
+	font-size: 0.9rem;
+}
+
+.giscus-unconfigured {
+	color: var(--text-color-alt);
+	font-style: italic;
+}

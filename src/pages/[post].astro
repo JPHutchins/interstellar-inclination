@@ -3,6 +3,7 @@ import Blog from "@layouts/blog";
 import Date from "@components/utilities/Date";
 import ReadingTime from "@components/blog/ReadingTime";
 import Tags from "@components/blog/Tags";
+import Responses from "@components/blog/Responses";
 import { published, getRSS, drafted } from "@data/post";
 import { getPosts } from "src/utils/get-posts";
 import type { GetStaticPaths } from "astro";
@@ -21,54 +22,65 @@ const { post } = Astro.props;
 const year = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 }).format(globalThis.Date.parse(post.date));
+const postUrl = new URL(post.slug, Astro.site).href;
 ---
 
 <Blog title={post.title}>
-	<div class="post-header container">
-		
-		<h1 class="post-title">{post.title}</h1>
-		<div class="post-date">
-			<Date date={post.date} />
-			<span class="meta-sep" aria-hidden="true">·</span>
-			<ReadingTime minutes={post.readMinutes} />
-			{post.tags.length > 0 && <span class="meta-sep" aria-hidden="true">·</span>}
-			<Tags tags={post.tags} />
-			<p>
-			Written without LLM assistance unless otherwise noted.
-			</p>
+	<article class="h-entry">
+		<a class="u-url" href={postUrl} hidden>{post.title}</a>
+		<a class="p-author h-card" href="/" hidden>{post.author}</a>
+		<div class="post-header container">
+			<h1 class="post-title p-name">{post.title}</h1>
+			<div class="post-date">
+				<Date date={post.date} class="dt-published" />
+				<span class="meta-sep" aria-hidden="true">·</span>
+				<ReadingTime minutes={post.readMinutes} />
+				{
+					post.tags.length > 0 && (
+						<span class="meta-sep" aria-hidden="true">
+							·
+						</span>
+					)
+				}
+				<Tags tags={post.tags} />
+				<p>Written without LLM assistance unless otherwise noted.</p>
+			</div>
 		</div>
-	</div>
-	<div class="content container">
-		{
-			post.draft ? (
-				<p class="aside caution" style="color: var(--text-color);">
-					This post was shared privately and the link must not be shared with any third
-					parties without approval of the Author. Furthermore, this post is a draft "work
-					in progress" and may contain misstatements, errors, inaccuracies, or other
-					unverified information, and should not be construed as representative of the
-					Author's opinion.
-				</p>
-			) : null
-		}
-		<post.Content />
+		<div class="content container">
+			{
+				post.draft ? (
+					<p class="aside caution" style="color: var(--text-color);">
+						This post was shared privately and the link must not be shared with any
+						third parties without approval of the Author. Furthermore, this post is a
+						draft "work in progress" and may contain misstatements, errors,
+						inaccuracies, or other unverified information, and should not be construed
+						as representative of the Author's opinion.
+					</p>
+				) : null
+			}
+			<div class="e-content">
+				<post.Content />
+			</div>
 
-		<hr />
-		<br />
+			<hr />
+			<br />
 
-		{
-			post.draft ? (
-				<p>
-					© {year} by {post.author}. All Rights Reserved.
-				</p>
-			) : (
-				// prettier-ignore
-				<p>
+			{
+				post.draft ? (
+					<p>
+						© {year} by {post.author}. All Rights Reserved.
+					</p>
+				) : (
+					// prettier-ignore
+					<p>
 					© {year} by {post.author}. Published under a Creative Commons
 					Attribution-NonCommercial 4.0 International
 					(<a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>)
 					license.
 				</p>
-			)
-		}
-	</div>
+				)
+			}
+		</div>
+	</article>
+	{!post.draft && post.comments !== false && <Responses postUrl={postUrl} />}
 </Blog>
