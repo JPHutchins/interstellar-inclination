@@ -3,19 +3,29 @@
 		<a href="https://github.com/JPHutchins" rel="me">
 			<img src="/github-mark.svg" alt="GitHub" />
 		</a>
-		<a
-			href="https://www.linkedin.com/in/j-p-hutchins-17357547/"
-		>
+		<a href="https://www.linkedin.com/in/j-p-hutchins-17357547/">
 			<img src="/linkedin-in.svg" alt="LinkedIn" />
 		</a>
 	</div>
-	&copy; JP Hutchins 2020-{new Date().getFullYear()}
+	<p class="h-card byline">
+		&copy;
+		<a class="p-name u-url" rel="me" href="/">JP Hutchins</a>
+		2020-{new Date().getFullYear()}
+		<img class="u-photo" src="/crumpledpaper_100x100.png" alt="JP Hutchins" />
+	</p>
 	<p>
 		Made with <a href="https://astro.build/">Astro</a> and lots of <a href="/credits">OSS</a>.
+	</p>
+	<p>
+		🏳️‍⚧️
 	</p>
 </div>
 
 <style>
+	.u-photo {
+		display: none;
+	}
+
 	.bottom {
 		background-color: var(--turquoise);
 		padding: 20px 5vw 10px;

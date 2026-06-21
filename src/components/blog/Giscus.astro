@@ -1,0 +1,83 @@
+---
+import type { GiscusConfig } from "@data/comments-config";
+
+interface Props {
+	config: GiscusConfig;
+	mapping?: "pathname" | "url" | "title" | "og:title";
+	lang?: string;
+}
+
+const { config, mapping = "pathname", lang = "en" } = Astro.props;
+const { repo, repoId, category, categoryId } = config;
+const configured = repoId !== "REPLACE_WITH_REPO_ID" && categoryId !== "REPLACE_WITH_CATEGORY_ID";
+const settings = JSON.stringify({ repo, repoId, category, categoryId, mapping, lang });
+---
+
+{
+	configured ? (
+		<div class="giscus" data-giscus={settings} />
+	) : (
+		<p class="giscus-unconfigured">
+			GitHub comments aren’t configured yet — add your <code>repoId</code> and{" "}
+			<code>categoryId</code> in <code>src/data/comments-config.ts</code> (see{" "}
+			<code>SETUP-COMMENTS.md</code>).
+		</p>
+	)
+}
+
+<script>
+	const root = document.querySelector<HTMLElement>(".giscus[data-giscus]");
+	const settings = root?.dataset.giscus;
+
+	if (root && settings) {
+		const cfg = JSON.parse(settings);
+		const theme = (): "light" | "dark" =>
+			document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+
+		const load = () => {
+			const script = document.createElement("script");
+			script.src = "https://giscus.app/client.js";
+			script.async = true;
+			script.crossOrigin = "anonymous";
+			Object.assign(script.dataset, {
+				repo: cfg.repo,
+				repoId: cfg.repoId,
+				category: cfg.category,
+				categoryId: cfg.categoryId,
+				mapping: cfg.mapping,
+				strict: "1",
+				reactionsEnabled: "1",
+				emitMetadata: "0",
+				inputPosition: "top",
+				theme: theme(),
+				lang: cfg.lang,
+				loading: "lazy",
+			});
+			root.appendChild(script);
+
+			new MutationObserver(() => {
+				const iframe = document.querySelector<HTMLIFrameElement>("iframe.giscus-frame");
+				iframe?.contentWindow?.postMessage(
+					{ giscus: { setConfig: { theme: theme() } } },
+					"https://giscus.app",
+				);
+			}).observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ["data-theme"],
+			});
+		};
+
+		const details = root.closest("details");
+		if (!details || details.open) {
+			load();
+		} else {
+			const onToggle = () => {
+				if (details.open) {
+					details.removeEventListener("toggle", onToggle);
+					load();
+				}
+			};
+			details.addEventListener("toggle", onToggle);
+		}
+	}
+</script>

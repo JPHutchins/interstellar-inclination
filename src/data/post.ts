@@ -18,6 +18,7 @@ export type Post = {
 	readMinutes: number;
 	icon?: string;
 	emoji?: string;
+	comments?: boolean;
 };
 
 function obfuscatedPath(str: string): string {

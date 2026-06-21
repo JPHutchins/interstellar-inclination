@@ -1,9 +1,10 @@
 ---
 interface Props {
 	date: string;
+	class?: string;
 }
 
-const { date } = Astro.props;
+const { date, class: className } = Astro.props;
 
 const formattedDate = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
@@ -12,4 +13,4 @@ const formattedDate = new Intl.DateTimeFormat("en-US", {
 }).format(globalThis.Date.parse(date));
 ---
 
-<time datetime={date}>{formattedDate}</time>
+<time datetime={date} class={className}>{formattedDate}</time>

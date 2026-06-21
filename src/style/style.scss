@@ -5,12 +5,14 @@
 @use "content";
 @use "table";
 @use "tabbed-code";
+@use "responses";
 @import url("https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css");
 
 html {
 	font-size: 112.5%;
 	scroll-behavior: smooth;
 	scroll-margin-top: 1em;
+	scrollbar-gutter: stable;
 	-webkit-text-size-adjust: 100%; /* Prevent font scaling in landscape while allowing user zoom */
 }
 

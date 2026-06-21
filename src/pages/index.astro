@@ -14,16 +14,16 @@ const allTags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) => 
 		<h1 class="post-title">Posts</h1>
 	</div>
 	<div class="content container">
-		<p>
-		Written without LLM assistance unless otherwise noted.
-		</p>
+		<p>Written without LLM assistance unless otherwise noted.</p>
 	</div>
 	<div class="content container">
 		<TagFilter tags={allTags} />
-		<div class="post-list">
+		<div class="post-list h-feed">
+			<data class="p-name" value="Crumpled Paper" hidden></data>
+			<a class="p-author h-card" href="/" hidden>JP Hutchins</a>
 			{
 				posts.map((post) => (
-					<article class="post-preview" data-tags={JSON.stringify(post.tags)}>
+					<article class="post-preview h-entry" data-tags={JSON.stringify(post.tags)}>
 						<Preview post={post} />
 					</article>
 				))
