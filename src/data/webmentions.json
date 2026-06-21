@@ -1,4 +1,27 @@
 {
-	"lastWmId": null,
-	"webmentions": []
+	"lastWmId": 2004108,
+	"webmentions": [
+		{
+			"author": {
+				"name": "",
+				"photo": "",
+				"type": "card",
+				"url": ""
+			},
+			"content": {
+				"text": "Hello bsky Bridgy Fed!"
+			},
+			"in-reply-to": "https://www.crumpledpaper.tech/2026-06-21-hello-fediverse",
+			"published": "2026-06-21T23:55:16+00:00",
+			"type": "entry",
+			"url": "https://bsky.app/profile/did:plc:q7gyjsuys6wdpvc5paqpwao3/post/3motl2zaqpc2f",
+			"wm-id": 2004108,
+			"wm-private": false,
+			"wm-property": "in-reply-to",
+			"wm-protocol": "webmention",
+			"wm-received": "2026-06-21T23:55:21Z",
+			"wm-source": "https://bsky.brid.gy/convert/web/at://did:plc:q7gyjsuys6wdpvc5paqpwao3/app.bsky.feed.post/3motl2zaqpc2f%23bridgy-fed-create-2026-06-21T23:55:18.762184+00:00",
+			"wm-target": "https://www.crumpledpaper.tech/2026-06-21-hello-fediverse"
+		}
+	]
 }
