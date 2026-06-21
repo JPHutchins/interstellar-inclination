@@ -31,6 +31,15 @@
 .content {
 	width: 100%;
 
+	font-family: "Libertinus Serif", serif;
+	font-variant-numeric: oldstyle-nums;
+	font-variant-ligatures: normal;
+	font-weight: normal;
+	font-optical-sizing: auto;
+	line-height: 1.38;
+	font-size: 1.2rem;
+	color: var(--text-color);
+
 	h1,
 	h2,
 	h3,
@@ -63,14 +72,6 @@
 	}
 
 	p {
-		font-family: "Libertinus Serif", serif;
-		font-variant-numeric: oldstyle-nums;
-		font-variant-ligatures: normal;
-		font-weight: normal;
-		font-optical-sizing: auto;
-		line-height: 1.38;
-		font-size: 1.2rem;
-		color: var(--text-color);
 		margin-bottom: 1em;
 	}
 
@@ -109,9 +110,9 @@
 		font-size: 1.3rem;
 	}
 
-	p code {
+	:not(pre) > code {
 		font-family: "Fira Code", monospace;
-		font-size: 1rem;
+		font-size: 0.85em;
 		line-height: 1;
 		color: var(--text-color-inline-code);
 		background-color: var(--background-color-inline-code);
@@ -173,11 +174,17 @@
 				margin-left: -0.75rem;
 				margin-right: -0.75rem;
 				padding-left: 0.75rem;
+				padding-right: 0.75rem;
 			}
+		}
+
+		p:last-child {
+			margin: 0;
 		}
 	}
 
-	.aside::before {
+	.aside::before,
+	.aside-title::before {
 		font-family: "Material Symbols Outlined";
 		font-weight: normal;
 		font-variation-settings:
@@ -190,11 +197,29 @@
 		margin-bottom: 0.5em;
 	}
 
+	// When a title is present, the icon rides on the title line instead
+	.aside:has(.aside-title)::before {
+		display: none;
+	}
+
+	.aside-title {
+		display: flex;
+		align-items: center;
+		gap: 0.4em;
+		font-weight: 600;
+		margin: 0 0 0.5em;
+	}
+
+	.aside-title::before {
+		margin-bottom: 0;
+	}
+
 	.aside.note {
 		border-color: #007acc;
 	}
 
-	.aside.note::before {
+	.aside.note::before,
+	.aside.note .aside-title::before {
 		content: "info";
 		color: #007acc;
 	}
@@ -203,7 +228,8 @@
 		border-color: #22c55e;
 	}
 
-	.aside.tip::before {
+	.aside.tip::before,
+	.aside.tip .aside-title::before {
 		content: "lightbulb";
 		color: #22c55e;
 	}
@@ -212,7 +238,8 @@
 		border-color: #9333ea;
 	}
 
-	.aside.important::before {
+	.aside.important::before,
+	.aside.important .aside-title::before {
 		content: "flag";
 		color: #9333ea;
 	}
@@ -221,7 +248,8 @@
 		border-color: #d97706;
 	}
 
-	.aside.warning::before {
+	.aside.warning::before,
+	.aside.warning .aside-title::before {
 		content: "warning";
 		color: #d97706;
 	}
@@ -230,7 +258,8 @@
 		border-color: #b91c1c;
 	}
 
-	.aside.caution::before {
+	.aside.caution::before,
+	.aside.caution .aside-title::before {
 		content: "dangerous";
 		color: #b91c1c;
 	}
@@ -248,6 +277,7 @@
 				margin-left: -0.75rem;
 				margin-right: -0.75rem;
 				padding-left: 0.75rem;
+				padding-right: 0.75rem;
 			}
 		}
 
@@ -260,6 +290,10 @@
 			&::before {
 				content: "— ";
 			}
+		}
+
+		p:last-child {
+			margin: 0;
 		}
 	}
 

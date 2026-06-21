@@ -30,35 +30,36 @@ export default function rehypeAside() {
 				// Loop through children to extract the type and collect content
 				for (let child of node.children) {
 					if (
+						!foundMarker &&
 						isElement(child) &&
 						child.tagName === "p" &&
 						child.children.length > 0 &&
-						!foundMarker
+						isTextNode(child.children[0])
 					) {
-						// Find the first text node to check for the marker
-						for (let i = 0; i < child.children.length; i++) {
-							const textNode = child.children[i];
-							if (isTextNode(textNode)) {
-								const text = textNode.value || "";
-								const match = text.match(
-									/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i,
-								);
+						const textNode = child.children[0];
+						const match = textNode.value.match(
+							/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\s*/i,
+						);
 
-								if (match) {
-									type = match[1].toLowerCase();
-									foundMarker = true;
+						if (match) {
+							type = match[1].toLowerCase();
+							foundMarker = true;
 
-									// Remove the marker and any following whitespace
-									const cleanedText = text.replace(match[0], "");
-									if (cleanedText.trim()) {
-										textNode.value = cleanedText;
-									} else {
-										// Remove the entire text node if it's empty
-										child.children.splice(i, 1);
-									}
-									break;
-								}
+							// Remove the marker and any following whitespace
+							const cleanedText = textNode.value.replace(match[0], "");
+							if (cleanedText.trim()) {
+								textNode.value = cleanedText;
+							} else {
+								// Remove the now-empty marker text node
+								child.children.splice(0, 1);
 							}
+
+							// Whatever remains on the marker's line becomes the title
+							if (child.children.length > 0) {
+								child.properties = { ...child.properties, class: "aside-title" };
+								asideChildren.push(child);
+							}
+							continue;
 						}
 					}
 					asideChildren.push(child); // Add all content to the aside

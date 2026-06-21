@@ -25,6 +25,7 @@ const year = new Intl.DateTimeFormat("en-US", {
 
 <Blog title={post.title}>
 	<div class="post-header container">
+		
 		<h1 class="post-title">{post.title}</h1>
 		<div class="post-date">
 			<Date date={post.date} />
@@ -32,6 +33,9 @@ const year = new Intl.DateTimeFormat("en-US", {
 			<ReadingTime minutes={post.readMinutes} />
 			{post.tags.length > 0 && <span class="meta-sep" aria-hidden="true">·</span>}
 			<Tags tags={post.tags} />
+			<p>
+			All content is written without LLM assistance unless otherwise noted.
+			</p>
 		</div>
 	</div>
 	<div class="content container">

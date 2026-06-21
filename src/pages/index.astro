@@ -14,6 +14,11 @@ const allTags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) => 
 		<h1 class="post-title">Posts</h1>
 	</div>
 	<div class="content container">
+		<p>
+		All content is written without LLM assistance unless otherwise noted.
+		</p>
+	</div>
+	<div class="content container">
 		<TagFilter tags={allTags} />
 		<div class="post-list">
 			{

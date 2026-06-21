@@ -1,12 +1,13 @@
 table {
 	width: 100%;
-	font-size: 0.9rem;
 	background-color: var(--background-color);
 	overflow: hidden;
 	border-width: 2px;
 	border-style: solid;
 	border-color: var(--text-color-alt);
 	border-collapse: collapse;
+	margin-bottom: 1em;
+	font-size: 0.9em;
 }
 
 thead {
