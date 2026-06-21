@@ -22,9 +22,9 @@ export const commentsConfig: CommentsConfig = {
 	blueskyProfileUrl: "https://bsky.app/profile/www.crumpledpaper.tech.web.brid.gy",
 	giscus: {
 		repo: "JPHutchins/interstellar-inclination",
-		repoId: "REPLACE_WITH_REPO_ID",
-		category: "Comments",
-		categoryId: "REPLACE_WITH_CATEGORY_ID",
+		repoId: "R_kgDONsP9iA",
+		category: "Announcements",
+		categoryId: "DIC_kwDONsP9iM4C_nmP",
 	},
 };
 
