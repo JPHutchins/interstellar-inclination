@@ -35,3 +35,21 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Webmention-mode: prompt Bridgy Fed to federate each published post right after
+  # deploy, instead of waiting on its (slow) feed-poll cadence.
+  federate:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Bridgy Fed for each post
+        run: |
+          curl -sS https://www.crumpledpaper.tech/rss.xml \
+            | grep -oE '<link>https://www\.crumpledpaper\.tech/[^<]+</link>' \
+            | sed -E 's,</?link>,,g' \
+            | grep -vE '/(rss|atom)\.xml$' \
+            | while read -r url; do
+                code=$(curl -sS -o /dev/null -w '%{http_code}' -X POST https://fed.brid.gy/webmention \
+                  --data-urlencode "source=$url" --data-urlencode "target=https://fed.brid.gy/")
+                echo "$code  $url"
+              done

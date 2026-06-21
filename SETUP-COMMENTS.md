@@ -26,14 +26,18 @@ No server, no database. The site stays static and portable. Everything below is 
  astro build reads src/data/webmentions.json ──► <Responses> renders replies + Giscus
 ```
 
-- **Federation is feed-based.** Bridgy Fed discovers and federates posts by polling
-  `/rss.xml` (and `/atom.xml`). We do **not** send outbound webmentions to Bridgy Fed.
-    > ⚠️ Do not send Bridgy Fed a webmention. The moment you do, it stops reading your
-    > RSS/Atom feed and expects a webmention for **every** future post. Staying on the
-    > feed path keeps this zero-maintenance. (Receiving inbound webmentions at
-    > webmention.io is fine — that's how replies get back and does not trigger the switch.)
-- The **site build never calls the webmention.io API.** It reads the committed
-  `src/data/webmentions.json`. The scheduled job is the only thing that talks to the API.
+- **Federation is webmention-based.** On every deploy, the `federate` job in
+  `.github/workflows/deploy.yaml` sends Bridgy Fed a webmention for each published post
+  (`source=<post url>`, `target=https://fed.brid.gy/`), so posts federate within seconds
+  of publishing rather than waiting on Bridgy Fed's slow feed poll. Each post template
+  links to `https://fed.brid.gy/` so the webmention is accepted.
+    > ⚠️ This is a one-way switch by design: once you send Bridgy Fed any webmention, it
+    > stops reading your RSS/Atom feed and expects a webmention per post. The deploy ping
+    > handles that automatically. The RSS/Atom feeds still exist for human subscribers —
+    > they're just no longer Bridgy Fed's discovery path.
+- **Receiving replies is unchanged:** inbound webmentions land at webmention.io and the
+  refresh cron bakes them into the committed `src/data/webmentions.json`. The site build
+  never calls the webmention.io API.
 
 ---
 
@@ -55,8 +59,8 @@ already advertised in the page `<head>` (see `src/components/layouts/blog.astro`
 
 1. Go to <https://fed.brid.gy/web-site>, enter `www.crumpledpaper.tech`, and connect.
 2. Your bridged handles become:
-    - Fediverse: **`@www.crumpledpaper.tech@web.brid.gy`**
-    - Bluesky: **`www.crumpledpaper.tech.web.brid.gy`**
+    - Fediverse: **`@crumpledpaper.tech@web.brid.gy`**
+    - Bluesky: **`crumpledpaper.tech`** (custom-domain handle, set via an `_atproto` DNS TXT record)
 3. Verify the profile URLs in `src/data/comments-config.ts`
    (`fediverseProfileUrl` / `blueskyProfileUrl`) point where you expect, and adjust if
    Bridgy Fed shows a different profile URL. These power the "Reply as …" call-to-action.
@@ -64,10 +68,9 @@ already advertised in the page `<head>` (see `src/components/layouts/blog.astro`
 Federation is automatic from there: Bridgy Fed periodically polls `/rss.xml`, bridges new
 posts, and routes replies back to webmention.io.
 
-> **Optional, advanced — instant federation.** If you ever want posts to federate
-> immediately instead of on Bridgy Fed's poll, you'd add an `h-entry` link to
-> `https://fed.brid.gy/` and send a webmention on publish. This opts you into the
-> webmention lane permanently (see the warning above). Not recommended unless you need it.
+> **Instant federation is active.** Each post links to `https://fed.brid.gy/` and the
+> `federate` job pings Bridgy Fed on every deploy, so posts federate within seconds. This
+> is the webmention lane described above — feed-polling is no longer the discovery path.
 
 ## 3. Giscus (GitHub comments)
 

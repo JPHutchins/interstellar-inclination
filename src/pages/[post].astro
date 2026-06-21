@@ -29,6 +29,7 @@ const postUrl = new URL(post.slug, Astro.site).href;
 	<article class="h-entry">
 		<a class="u-url" href={postUrl} hidden>{post.title}</a>
 		<a class="p-author h-card" href="/" hidden>{post.author}</a>
+		<a href="https://fed.brid.gy/" hidden></a>
 		<div class="post-header container">
 			<h1 class="post-title p-name">{post.title}</h1>
 			<div class="post-date">
