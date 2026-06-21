@@ -234,6 +234,13 @@ tree has to be recompiled to bytecode.
 	caption="One-time dependency import, cold vs warm. The native slots record imports no library at all (a slotted class is pure builtins, and Final is erased at runtime), so it pays nothing. The standout is record-type (C): a compiled .so loads in ~0.2 ms — ~95× lighter than msgspec — and is the one dependency with no cold penalty at all (cold == warm), because a .so has no Python source to recompile."
 />
 
+## Instance Cost
+
+<Plotly
+	{...charts.instCost}
+	height={400}
+/>
+
 ## Instance Memory
 
 Memory is driven by object layout. Freezing a type never changes its footprint —
@@ -247,7 +254,47 @@ speed, and gives every compiled class a fixed layout even without `__slots__`.
 	caption="Bytes per instance, measured with tracemalloc (GC header included). The manual record *is* genuinely immutable — but its custom __setattr__ costs mypyc the compact layout: it's the one construct that grows under compilation (64→96, vs 64→72 for the native/dataclass vtable word). record-type (C) shows the way out: a hand-built C struct that is immutable *and* compact (64 bytes, like msgspec) — no Python __setattr__ to defeat the layout. attrs, msgspec, and both record-types are defined outside the compiled module, so they have no mypyc bar."
 />
 
-## The cost of immutability
+## So what's the fastest struct?
+
+Total startup ($t_{\text{startup}}$) is calculated as the fixed dependency import (the [module cost](#module-cost), $m_{\text{module}}$) plus the number of types ($N$) × the per-type definition cost ($c_{\text{type}}$).
+
+
+$$
+t_{\text{startup}} = m_{\text{module}} + N \cdot c_{\text{type}}
+$$
+
+The construct with the cheap dependency (`NamedTuple` leans on `typing`,
+already fast and often already imported) wins at low N; the one with the cheap
+per-type slope (`msgspec`) wins once N is large enough. Collapsing cold and warm
+into a band per construct makes the crossover a *range*: `msgspec` overtakes
+somewhere between **229 types (warm)** and **1,622 types (cold)**. Below that,
+`typing.NamedTuple` is the fastest *stdlib* immutable option to start — though the
+hand-written and C-backed records below start faster still.
+
+<Plotly
+	{...charts.startup}
+	height={560}
+	caption="Solid line = warm (cached bytecode), dotted = cold (recompiled), shaded band = the cache-state range. A Final-slots record is lowest by far — zero dependency, ~7 µs/type — its interpreted band and mypyc line nearly coincide, the point being that mypyc barely changes startup (it just removes the cold tail; it does NOT make the record immutable — Final is unenforced at runtime). The manual record and record-type (C), both genuinely immutable, track just above native: runtime immutability *and* near-native startup. record-type (C) is the one to watch — a tiny fixed ~0.2 ms import (the .so) plus msgspec's cheap C per-type, so it stays far below msgspec at every N: no crossover, where msgspec only overtakes NamedTuple past ~229 types. dataclass and attrs sit above everything — dominated for startup. Use the log / linear (0–1000 ms) buttons above the chart to flip the Y axis: log keeps the whole range legible, linear makes the at-scale blow-up of dataclass and attrs unmissable."
+/>
+
+A `Final`-slotted class is the cheapest to start of anything here (zero
+dependency, ~7 µs/type) — and that's true interpreted *or* compiled, since mypyc
+barely touches startup. What mypyc adds is a faster, more compact native
+instance — *not* immutability: `Final` is a static-checker hint, and the compiled
+slot is still writable at runtime (`o.a = 99` succeeds on the `.so`). So a
+`Final`-slotted class is the leanest *statically*-immutable record — mypy catches
+reassignment, nothing at runtime does. Among options the runtime *actually*
+enforces, **`typing.NamedTuple`** is the pragmatic standard-library default at
+typical scale (hundreds of types) — no dependency tax beyond `typing`, immutable
+for free — though, as the next two sections show, a hand-written record (or a
+C-backed one) starts faster still. And **`msgspec`** is the pick when you define
+very many types or live on a hot allocation path, where its C-level
+construction — immutable, enforced in C — compounds, once you've paid its heavy
+one-time import.
+
+## Appendix
+
+### The cost of immutability
 
 Immutability sometimes costs time or space and is never more efficient.
 
@@ -328,7 +375,7 @@ Nine instructions become twenty-five. `msgspec` and `NamedTuple` sidestep this
 entirely — neither has an interpreted `__init__` to run; construction bottoms
 out in C. */}
 
-## NamedTuple in mypyc
+### NamedTuple in mypyc
 
 I was really hoping that mypyc was going to compile NamedTuple to a native struct. Compiling the module changes *almost nothing* about the `NamedTuple`, while it transforms `native slots`:
 
@@ -383,41 +430,9 @@ breaking the tuple contract.
 
 So, I've been right to reach for `NamedTuple` as a cheaper immutable type than `dataclass(frozen=True)`, but I was wrong to think that it was _perfectly_ efficient and compact like a C struct.
 
+### `native slots`
 
-
-## When does msgspec overtake NamedTuple?
-
-Total startup is a fixed dependency import plus N × the per-type construction
-cost. The construct with the cheap dependency (`NamedTuple` leans on `typing`,
-already fast and often already imported) wins at low N; the one with the cheap
-per-type slope (`msgspec`) wins once N is large enough. Collapsing cold and warm
-into a band per construct makes the crossover a *range*: `msgspec` overtakes
-somewhere between **229 types (warm)** and **1,622 types (cold)**. Below that,
-`typing.NamedTuple` is the fastest *stdlib* immutable option to start — though the
-hand-written and C-backed records below start faster still.
-
-<Plotly
-	{...charts.startup}
-	height={560}
-	caption="Solid line = warm (cached bytecode), dotted = cold (recompiled), shaded band = the cache-state range. A Final-slots record is lowest by far — zero dependency, ~7 µs/type — its interpreted band and mypyc line nearly coincide, the point being that mypyc barely changes startup (it just removes the cold tail; it does NOT make the record immutable — Final is unenforced at runtime). The manual record and record-type (C), both genuinely immutable, track just above native: runtime immutability *and* near-native startup. record-type (C) is the one to watch — a tiny fixed ~0.2 ms import (the .so) plus msgspec's cheap C per-type, so it stays far below msgspec at every N: no crossover, where msgspec only overtakes NamedTuple past ~229 types. dataclass and attrs sit above everything — dominated for startup. Use the log / linear (0–1000 ms) buttons above the chart to flip the Y axis: log keeps the whole range legible, linear makes the at-scale blow-up of dataclass and attrs unmissable."
-/>
-
-A `Final`-slotted class is the cheapest to start of anything here (zero
-dependency, ~7 µs/type) — and that's true interpreted *or* compiled, since mypyc
-barely touches startup. What mypyc adds is a faster, more compact native
-instance — *not* immutability: `Final` is a static-checker hint, and the compiled
-slot is still writable at runtime (`o.a = 99` succeeds on the `.so`). So a
-`Final`-slotted class is the leanest *statically*-immutable record — mypy catches
-reassignment, nothing at runtime does. Among options the runtime *actually*
-enforces, **`typing.NamedTuple`** is the pragmatic standard-library default at
-typical scale (hundreds of types) — no dependency tax beyond `typing`, immutable
-for free — though, as the next two sections show, a hand-written record (or a
-C-backed one) starts faster still. And **`msgspec`** is the pick when you define
-very many types or live on a hot allocation path, where its C-level
-construction — immutable, enforced in C — compounds, once you've paid its heavy
-one-time import.
-
-## A complete hand-written record
+### `manual record`
 
 A fair objection to the `Final`+slots control: it's cheap precisely because it
 does *less*. It has no `__eq__`, `__hash__`, or `__repr__`, and — as we saw — it
@@ -483,7 +498,7 @@ immutable record with no import tax — is exactly what C fills. `msgspec` is on
 answer, but it drags a serialization library's import along with it. The next
 section measures another.
 
-## A record in C
+### record-type (C)
 
 The manual record marks the pure-Python ceiling: complete and immutable, with
 near-zero import, but either slow to construct (222 ns) or — once mypyc lowers its
@@ -536,7 +551,7 @@ here is measured exactly like every other construct — module self-time ÷ K, w
 includes the ~7 µs the bare `class` statement costs regardless — so it is directly
 comparable to the figures above.)
 
-## Looking upstream
+###  Looking upstream
 
 Is any of this getting easier? There's active discussion of a first-class
 record/struct type for Python — Brett Cannon's

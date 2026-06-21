@@ -372,6 +372,27 @@ export const depImport = groupedBar(
 	"milliseconds (cumulative, fresh interpreter)",
 );
 
+// --- per-instance construction time (ns) ---------------------------------
+// Parallel to memFootprint but for instantiation: FOCUS framing, frozen
+// variant, interpreted vs mypyc. (Cold/warm is a bytecode-cache effect on
+// import, not on a runtime per-instance op, so it does not apply here.)
+export const instCost = groupedBar(
+	order(FOCUS).map((c) => c.label),
+	[
+		{
+			name: "interpreted",
+			color: PALETTE.warm,
+			values: order(FOCUS).map((c) => c.frozen.instNs.interp),
+		},
+		{
+			name: "mypyc-compiled",
+			color: PALETTE.compiled,
+			values: order(FOCUS).map((c) => c.frozen.instNs.mypyc),
+		},
+	],
+	"nanoseconds per instantiation",
+);
+
 // --- Figure 2: per-instance memory (bytes → integers) --------------------
 export const memFootprint = groupedBar(
 	order(FOCUS).map((c) => c.label),
@@ -618,6 +639,7 @@ export const charts = {
 	mypycPerType,
 	coldWarmPerType,
 	depImport,
+	instCost,
 	memFootprint,
 	immMemory,
 	immInstantiation,
