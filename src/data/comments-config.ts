@@ -30,3 +30,6 @@ export const commentsConfig: CommentsConfig = {
 
 export const webmentionEndpoint = (domain: string): string =>
 	`https://webmention.io/${domain}/webmention`;
+
+export const pingbackEndpoint = (domain: string): string =>
+	`https://webmention.io/${domain}/xmlrpc`;
