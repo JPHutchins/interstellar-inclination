@@ -77,6 +77,7 @@ The repository, [python-distribution-example](https://github.com/JPHutchins/pyth
 The following are excerpts and explanations of the files that are relevant to running the app locally.
 
 > [!NOTE]
+> 
 > Tooling and dependencies are intentionally kept to a minimum in this example repository. A more complicated app that has more dependencies will benefit from the usage of tools that help to resolve dependencies and manage environments. Unfortunately, there is no easy recommendation to make.
 >
 > <br>
@@ -173,32 +174,6 @@ If you have Python &gt;=3.8 go ahead and use that. If not, install the most rece
 * Windows: use the Microsoft Store or `winget` and take advantage of "App Execution Aliases". Whatever you do, make sure that both `python` and `python3` call the Python you want, none of this `py` nonsense!
     
 * Linux: use your package manager, and maybe [deadsnakes](https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa) if you're on Ubuntu since they don't keep their Python packages current.
-    
-
-> "A quote with a semantic \<cite\>"
-> 
-> <cite>Jean Ralphio, On Grapes</cite>
-
-> [!NOTE]
-> Hello
->
-> <br>
->
-> world!
->
-
-> [!TIP]
-> A tip
-
-> [!IMPORTANT]
-> Important
->
-
-> [!WARNING]
-> Warning
-
-> [!CAUTION]
-> Caution
 
 ## Build the App
 

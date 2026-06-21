@@ -73,7 +73,9 @@ bar_response = request(Bar())
 reveal_type(bar_response)  # Response 😔
 ```
 
-> [!TIP] You could get more flexibility by adding a Request class variable to the class instead of inheriting from the Request.
+> [!TIP]
+> 
+> You could get more flexibility by adding a Request class variable to the class instead of inheriting from the Request.
 
 ## The Request Generic Protocol
 
@@ -90,7 +92,9 @@ TResponse = TypeVar("TResponse", bound=Response)
 class RequestProtocol(Protocol[TResponse]) -> TResponse:
     Response: Type[TResponse]
 ```
-> [!NOTE] `Protocol[T, ...]` is shorthand for `Protocol, Generic[T, ...]`, [link](https://typing.readthedocs.io/en/latest/spec/protocol.html#generic-protocols).
+> [!NOTE]
+> 
+> `Protocol[T, ...]` is shorthand for `Protocol, Generic[T, ...]`, [link](https://typing.readthedocs.io/en/latest/spec/protocol.html#generic-protocols).
 
 Now, the we can achieve our goal of communicating that the Type of a Response is dependent on the Type of a Request, information that is known before runtime:
 ```python
@@ -127,7 +131,8 @@ match status := await request(Status()):
 ```
 The `case _:` statement, as in Rust, is followed if the pattern is unmatched above. Executing `typing.assert_never(status)` here provides a compile-time check that every return type of the request function has been handled.
 
-> [!NOTE] 
+> [!NOTE]
+>  
 > The `match` statement will not work in Python versions before 3.10. Python 3.9 EOL is in October of 2025, so if you are maintaining a library, it may be most polite to wait until Python 3.9 is retired.
 
 [Check it out on mypy Playground](https://mypy-play.net/?mypy=latest&python=3.12&gist=5636231bd2dd2ae5985f3606a263b64b&flags=strict) or take a look at the corresponding GitHub Gist below:

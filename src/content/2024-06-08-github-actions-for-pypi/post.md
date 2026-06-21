@@ -38,6 +38,7 @@ Once we've learned how to mitigate each of these risks, we will show how applyin
 ### 1\. Reviewing Pull Requests
 
 > [!WARNING]
+> 
 > An attacker poses as a contributor and merges malicious code to your package via a **Pull Request**.
 
 By default, GitHub will not allow any modification of your repository without your explicit approval. This threat can be minimized by carefully reviewing all contributions to your repository and only elevating a contributor's privileges once they are a trusted partner.[^1] If you believe that a PR is attempting to inject a security vulnerability in your app, then you should [report the offending account](https://docs.github.com/en/communities/maintaining-your-safety-on-github/reporting-abuse-or-spam#reporting-an-issue-or-pull-request).
@@ -66,6 +67,7 @@ So, how can we prove that the software that a user receives when they type `pipx
 ### 3\. Protecting Your GitHub Account
 
 > [!WARNING]
+> 
 > An attacker logs in to your **GitHub account** and replaces your app's repository with malicious code or uses a leaked **Personal Access Token (PAT)** or **Secure Shell (SSH) key** to push directly to the repository.
 
 Protection of your GitHub account web login is the same as it would be for any other sensitive website: use a strong password that is unique to the website (use a [password manager](https://bitwarden.com/resources/why-enterprises-need-a-password-manager/)) and use two-factor authentication (2FA).
@@ -87,6 +89,7 @@ In summary, keep your SSH keys and PATs secret and regularly audit your GitHub a
 ### 4\. Protecting your PyPI Account
 
 > [!WARNING]
+> 
 > An attacker logs in to your **PyPI account** and replaces your package with malicious code.
 
 Protection of your PyPI account web login is the same as it would be for any other sensitive website: use a strong password that is unique to the website (use a [password manager](https://bitwarden.com/resources/why-enterprises-need-a-password-manager/)) and use two-factor authentication (2FA).
@@ -94,6 +97,7 @@ Protection of your PyPI account web login is the same as it would be for any oth
 ### 5\. Package Impersonation
 
 > [!WARNING]
+> 
 > An attacker creates a malicious Python package with the **same name** as yours and distributes it outside of PyPI.
 
 By default, tools like `pip` and `pipx` will search PyPI for the package specified. To install a package from an outside source, `pip` would need to be told explicitly to point to the location of the infected package.
@@ -126,6 +130,7 @@ pipx install jpsapp
 ### 6\. Typo Squatting
 
 > [!WARNING]
+> 
 > An attacker uploads a malicious Python package to PyPI with a name that is similar to yours ("typo squatting"), the intention being to **trick users into downloading the wrong package**.
 
 For example, a user intending to install `matplotlib` may make the typo `matplotli` and accidentally install the wrong package. In a sophisticated supply chain attack, the `matlplotli` package would be mostly identical to the latest `matplotlib` package with the only differences being obfuscated malware installation and execution.
@@ -147,6 +152,7 @@ Make certain that the command you've added to the documentation is runnable as w
 ### 7\. Supply Chain Attack
 
 > [!WARNING]
+> 
 > An attacker has compromised one of your upstream dependencies, a "supply chain attack", so that your users are affected when importing or running your package.
 
 You've done everything right. But, one day when you're updating your project's dependencies, you unknowingly infect your package and all of your users because one of *your dependencies* fell victim to one of the threats described above.
@@ -282,7 +288,9 @@ Everything indented under the `steps:` section are the steps to perform for this
 
 This is almost always the first step in a job that will make use of the repository source code. This may sound obvious, but it's best to be explicit about what resources are being made available, so it is required.
 
-> [!TIP] If you are using the Git tag as the Single Source of Truth for your package version, then you'll probably need a step like `run: git fetch --prune --unshallow --tags` to make sure that you have the latest tags on the runner. See the more sophisticated build scripts and workflows of a real app, like [smpmgr](https://github.com/intercreate/smpmgr), for details.
+> [!TIP] 
+> 
+> If you are using the Git tag as the Single Source of Truth for your package version, then you'll probably need a step like `run: git fetch --prune --unshallow --tags` to make sure that you have the latest tags on the runner. See the more sophisticated build scripts and workflows of a real app, like [smpmgr](https://github.com/intercreate/smpmgr), for details.
 
 ---
 
@@ -407,8 +415,7 @@ Take a look the complete [release.yaml](https://github.com/JPHutchins/python-dis
 
 All of the hard work of automating the PyPI release process is out of the way and now it's time to deploy!
 
-> [!NOTE]
-> **About Versioning**
+> [!NOTE] About Versioning
 >
 > <br />
 >

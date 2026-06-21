@@ -343,7 +343,8 @@ Clang C++ `armv7-a clang 18.1.0` (no options needed):
 Even though the integer literal is in range of the enum, use of the integer literal still causes a compile time error as desired.
 
 
-> [!TIP]
+> [!TIP] Casting
+> 
 > Of course it is possible to cast any random value to the enum type and reintroduce the run time error. Why would a programmer do this? This is a non-issue when the use of casts is avoided altogether—a topic for another article.
 > 
 > <br>
@@ -357,7 +358,9 @@ While the C standard may not provide guarantees about enum type safety, the spec
 
 By avoiding use of a `default` case and adding the `-Werror -Wall -Wextra -Wc++-compat` compiler options, it is **"impossible to generate a run time error"**. Yet, if that is true, then it raises a question about
 the necessity of runtime type checking.
-> [!CAUTION] If a run time error is not possible, can `assert(0)` be replaced with `__builtin_unreachable()`?
+> [!CAUTION]
+> 
+> If a run time error is not possible, can `assert(0)` be replaced with `__builtin_unreachable()`?
 
 ```c
 enum result handle_event(enum event event) {
