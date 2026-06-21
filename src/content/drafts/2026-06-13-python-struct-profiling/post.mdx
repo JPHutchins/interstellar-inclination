@@ -94,12 +94,12 @@ Invalid runtime states are now possible: `DeviceInfo(serial_number="abc", manufa
 
 > [!NOTE] The sum is smaller than the product
 > 
-> Where the _sum type_ version has two representable states, the _product type_ has four, two of which are invalid.
+> Where the _sum type_ version can only represent the valid V1 and V2 states, the _product type_ can create an invalid runtime state.
 > | Variant | serial_number | manufactured_utc_ms | bootloader_sha |
 > |---------|---------------|-------------------|----------------|
-> | v1      | `str`           | `int`       | `None`              |
+> | v1 or v2 | `str`           | `int`       | `None`              |
+> | v1      | `str`           | `None`              | `None`           |
 > | v2      | `str`           | `int`               | `int`            |
-> | Invalid      | `str`           | `None`              | `None`           |
 > | Invalid     | `str`           | `None`              | `int`             |
 
 Using a product type instead of a sum type shifts the burden of correctness from the type system to the runtime.
