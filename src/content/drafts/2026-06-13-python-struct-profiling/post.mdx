@@ -1,47 +1,205 @@
 ---
-title: "Picking a Python struct: memory, bytecode, import time, and mypyc"
+title: "The Fastest Python Struct?"
 author: JP Hutchins
-date: 2026-06-13
+date: 2026-06-20
 tags: [types, python, CPython, struct, mypyc, "functional programming"]
 icon: /python.png
 preview: |
-  Benchmarking NamedTuple, frozen dataclasses, attrs, and msgspec across memory,
-  instantiation, and the often-ignored axis: program start time — and what a
-  C-backed record could do.
+  An adventure in Python struct benchmarking: slotted class, NamedTuple, dataclass, attrs, msgspec, record-type, and a new C extension based on record-type and
+  msgspec. Focus is on import-time, type-construction, memory, and instantiation cost,
+  NOT SERIALIZATION, including impact of mypyc
 ---
 
 import Plotly from "@components/Plotly";
 import StructData from "@components/StructData";
 import { charts } from "@data/struct-charts";
 
-When you reach for a "record" type in Python — `typing.NamedTuple`, a frozen
-`dataclass`, an `attrs` class, or a `msgspec.Struct` — the per-instance memory
-and speed numbers are well-trodden. The axis almost nobody measures is **program
-start time**: the work Python does to *create the types themselves* when a module
-is imported, how that changes between a cold start and a warm one, and whether
-compiling with [mypyc](https://mypyc.readthedocs.io/) helps.
+Why do I care? Why do I get obsessed enough to coerce Claude into running these
+benchmarks and writing these Plotly charts? I do not know.[^1]
 
-All numbers below are from CPython 3.14.0 (mypy/mypyc 2.1.0, attrs 26.1.0,
-msgspec 0.21.1): per-instance and timing data from a benchmark harness comparing
-an interpreted module against the same module compiled with mypyc, and
-import-time data from fresh-interpreter `python -X importtime` runs (median of
-five). "Warm" means Python's compiled-bytecode cache (the `__pycache__/*.pyc`
-files) is present; "cold" means it has to compile the source first.
+[^1]: If you have any ideas, please LMK so I can explain it to my family.
+
+But! I do know _what_ I care about (for now) - and today (and some of the past weekend, and perhaps some of the next one),
+it's definitely the _cost of defining (ideally immutable) record types (AKA structs) in Python_.
+
+So let's get this out of the way: this write up is about benchmarking "Python type speed", it is NOT about benchmarking
+- serialization
+- instantiation
+- attribute access
+- validation
+- memory
+
+Right, so that's what Python programmers often care about, because they are probably working on long running programs, like servers or pipelines, where the cost of defining a __type__ is paid upfront, one time, whereas the cost of allocation, instantiation, validation, and serialization is paid repeatedly. So yeah, if that's what you care about, this post is not for you.
+
+If you're convinced, then jump straight to the [analysis](#structs-under-test-suts), otherwise keep reading for my motivation and context on this subject.
+
+## "how fast to `--help`"
+
+I tend to work on CLIs for developers and tooling for build systems or test suites where the time from program start to end is what we're measuring. Perhaps you've noticed that running a command from a CLI may be near instant in a compiled program, but in Python, it can easily be hundreds of milliseconds: perceptible for UX, noticeable in CI/CD, and amplified by repeated calls as part of build system tooling.
+
+Unlike in a compiled language, Python type definitions are not free (free in the sense that they were paid for during compilation _ahem, Rust_). They are code to be executed on every startup. And that includes imports of libraries and their type trees and dependents trees. We'll see in the benchmarks that (evil) metaprogramming, like decorators, metaclasses, or worse, have more of an upfront _runtime type generation_ cost than manual type definitions.
+
+Can we get the best of everything: a Pythonic type definition style, complete static typing and [match](https://docs.python.org/3/reference/datamodel.html#object.__match_args__), with the speed of a hand-written C struct, and the startup time of a compiled extension? I _think_ so. <sup style={{fontSize: "0.7em"}}>_seriously, I'm not sure, need to do more work, but I have good preliminary data_</sup>
+
+> Python is not _completely_ "uncompiled", and we'll be assessing both cold (no python bytecode cache) and warm (with python bytecode cache) startup times, and look at how mypyc can help with some of the costs.
+
+But why not use a compiled language and framework like Rust + [clap](https://docs.rs/clap/latest/clap/)? I certainly do, but what can I say: I love the Python ecosystem, build tooling libraries, and the rapidly evolving type system. And I believe that the type system can continue evolvoing so that we can offload a lot of the correctness to the type checker, and reap runtime speed benefits. That's what this post is about.
+
+## OK, OK, whatever, but why "structs"?
+
+I'll confess that I am an advocate of functional programming (FP), with little compromise. But the tortured kind, that can't be bothered to learn Haskell, or study Lisp, and seems to end up rewriting the same handful of patterns in every language. So, it's not the _structs alone_ that I am after. It's the **sum types and pattern matching**.
+
+> [!NOTE] Algebraic Data Types
+> 
+> [_sum type_](https://en.wikipedia.org/wiki/Tagged_union) is the FP term for a type union. `enum` in Rust, tagged `union` in C, `std::variant` in C++, discriminated unions in TypeScript, are common examples. A plain struct (or record, implying immutability) is a _product type_ in FP.
+>
+> [_pattern matching_](https://en.wikipedia.org/wiki/Pattern_matching) is the related control flow aspect. `switch` in C & C++ do not pattern match (though they can guarantee [_exhaustiveness_ at compile time](https://www.crumpledpaper.tech/2024-12-16-enum-type-safety-in-c/#exhaustiveness)), but `match` in Rust, Python, and Haskell do.
+>
+> If you're not feeling motivated, then [this YouTube video by No Boilerplate](https://www.youtube.com/watch?v=z-0-bbc80JM) is a great intro, though you'll have to extrapolate that this is (more or less precariously) applicable to many type systems, not just Rust - but Rust just did it well ❤️🦀 (for a procedural language 😜).
+
+Long story short, I use sum types and pattern matching everywhere, all the time, from Rust to embedded C, from Typescript to Python, from JSON to CBOR. Even if your not an FP...enthusiast, you've likely used them in Python without thinking of them as such, when reaching for `MyType | None` (an `Option` or `Maybe` type).
+
+So, you might see something like this in every Python program I write. This example imagines that some immutable device info burned onto a ROM is versioned V1 and V2. V1 guaranteed presence of the serial number, but not the manufactured date. V2 guarantees both and adds a bootloader SHA.
+
+```python
+from typing import NamedTuple
+
+class DeviceInfoV1(NamedTuple):
+	serial_number: str
+	manufactured_utc_ms: int | None
+
+class DeviceInfoV2(NamedTuple):
+	serial_number: str
+	manufactured_utc_ms: int
+	bootloader_sha: int
+
+type DeviceInfo = DeviceInfoV1 | DeviceInfoV2
+```
+
+`DeviceInfo` is a _sum type_ of two _product types_,`DeviceInfoV1` and`DeviceInfoV2`, and there are only two representable states, each validated by the type system, not at runtime. Here's what the naive product type would look like:
+
+```python
+class DeviceInfo(NamedTuple):
+	serial_number: str
+	manufactured_utc_ms: int | None
+	bootloader_sha: int | None
+```
+
+Invalid runtime states are now possible: `DeviceInfo(serial_number="abc", manufactured_utc_ms=None, bootloader_sha=123)` is a valid instance of the naive product type, but it is not a valid `DeviceInfoV1` or `DeviceInfoV2`.
+
+> [!NOTE] The sum is smaller than the product
+> 
+> Where the _sum type_ version has two representable states, the _product type_ has four, two of which are invalid.
+> | Variant | serial_number | manufactured_utc_ms | bootloader_sha |
+> |---------|---------------|-------------------|----------------|
+> | v1      | `str`           | `int`       | `None`              |
+> | v2      | `str`           | `int`               | `int`            |
+> | Invalid      | `str`           | `None`              | `None`           |
+> | Invalid     | `str`           | `None`              | `int`             |
+
+Using a product type instead of a sum type shifts the burden of correctness from the type system to the runtime.
+
+> [!TIP] Result Type
+>
+> You can do _`Result`-like_ generic types in Python.
+> 
+> ```python
+> from typing import NamedTuple
+> 
+> class Ok[V](NamedTuple):
+> 	value: V
+> 
+> class Err[E](NamedTuple):
+> 	error: E
+> 
+> type Result[V, E] = Ok[V] | Err[E]
+> ```
+> 
+> A `Result` is either an `Ok` with a value of type `V`, or an `Err` with an error of type `E`. You can then pattern match on the result, and because it's covered by type checkers before runtime, it's an abstraction that gives you _compile-time correctness_ with _zero runtime cost_.
+> 
+> ```python
+> match result:
+> 	case Ok(value):
+> 		print(f"Got a value: {value}")
+> 	case Err(error):
+> 		print(f"Got an error: {error}")
+> ```
+>
+> Why not just `type Result[V, E] = V | E`? Because the wrapper is what we are discriminating on, not the content.
+>
+> _Look at [returns](https://github.com/dry-python/returns) before rolling your own FP type system in Python! Or whatever, have fun!_
+
+## Aw, f&*#! 
+
+I promised myself I wouldn't evangelize FP (Day 583). 💀
+
+It's not really about FP, that just happens to be _my_ motivation. There are plenty of different ways to utilize Abstract Data Types (ADTs) in Python, and if you care about Python startup time, then I think you'll enjoy these benchmark results.
+
+Besides, this _can't_ be about FP, because functional programmers don't care about performance, memory, or know anything about compilers and instruction sets.
+
+> "Functional programming, strictly defined, is dumb...the way you manage mutable state is by making an entire copy of the data structure with the changes in the new copy of the data structure...here's the problem: computers, they're all bags of mutable state."
+>
+> <cite>Chris Lattner, [Creator Of Swift On Functional Programming (YouTube)](https://www.youtube.com/watch?v=8nyg_IXfnvs)</cite>
+
+Odd for the creator of LLVM, Clang, Swift, and Mojo to mischaracterize FP as anything other than an abstraction. I wasn't aware of the "functional" instruction sets competing with x86 and ARM.
+
+## WTF are we testing again?
+
+THE CONTENDERS
+
+*author's commentary italicized to avoid bias
+
+- manual python slotted class: **"Native Final Slots"** <span style={{fontSize: "0.8em"}}>_ewwwwwwwwwwww_</span>
+- manual python slotted class (Brett Cannon's manual `record-type`): **"Manual Record Type"** <span style={{fontSize: "0.5em"}}>_oh god that's even worse, this IS a waste of time, we're going to turn Python into Java or something_</span>
+- from Python's standard library, `typing` module: **`NamedTuple`** _pewwwwww pew pew pewwwwwwoooo_
+- also from the standard library, `dataclasses`: **`dataclass(frozen=True)`** <span style={{fontSize: "0.8em"}}>_boooooooooo metaprogramming suuuuuuuuuuucks.....unless it's rust's bs.........or constexpr....at least it's not C macros.....but booooooooooooooooooo_</span>
+- from legendary Python core developer Br Br Bre Brett Cannon, iiiiiiiit's **`record-type`** _a new hope_
+- from a 20 minute Claude hallucination that rips off `msgspec` and `record-type` <sup style={{ fontSize: "0.7em"}}>*WITH ATTRIBUTION</sup> wait, I'm calling it **`record-type (C)`**!?!?! <span style={{fontSize: "0.8em"}}>_hey, 20 minutes is not bad, it usually costs me $200 to get slop CPython!_</span>
+- weighing in at 11 years of development, the original **`attrs`** 🎺 _medieval horns, but in tune_ 🎺
+- fast AF and only ~14.3% vowels iiiiiiiiiiiiiiit's **`msgspec`** <span style={{fontSize: "0.6em"}}>_what is JSON for anymore?_</span>
+
+> [!NOTE] No Pydantic?
+> 
+> [Pydantic](https://pydantic.dev/) serves a very different purpose than the structs above, and is [pretty slow](https://gist.github.com/jcrist/d62f450594164d284fbea957fd48b743?permalink_comment_id=5883610#gistcomment-5883610) because it's doing so much, even at [type time](https://github.com/JPHutchins/smp/issues/26#issuecomment-2323046026). attr's [Why not...?](https://www.attrs.org/en/stable/why.html) page has a good explanation.
+
+I use `NamedTuple` all the time, mostly because it means I don't have to add `@dataclass(frozen=true)` everywhere, but in the back of my mind I have always _believed_ that `NamedTuple` must be super efficient and compact, like `const struct` in C or `struct` in Rust. Once I realized that I'd been carrying on with this believe, I decided to setup a benchmark to understand how much I was truly paying for my types.
 
 ## Table of Contents
 
-## Import / type-construction cost
+## Structs Under Test (SUTs)
 
-The real cost of *defining* a type, measured in the form you actually write in a
-module — the `@dataclass` decorator and the `class C(NamedTuple)` statement.
-(Measuring the dynamic factory forms instead — `make_dataclass()`,
-`NamedTuple(...)` as a call — understates `typing.NamedTuple` by roughly 3×,
-because the class-statement form runs a metaclass the call form skips.)
+| Implementation | Description |
+|----------------|-------------|
+| [native slots](#native-slots) | Bare-bones slotted class with `Final`-annotated fields, the closest thing to a naive native record. |
+| [manual record](#manual-record) | A slotted class with common capabilities based on `record-type` |
+| [NamedTuple](https://typing.python.org/en/latest/spec/namedtuples.html#named-tuples) | From the standard library's `typing` module |
+| [dataclass](https://docs.python.org/3/library/dataclasses.html) | From the standard library's `dataclasses` module |
+| [frozen dataclass](https://docs.python.org/3/library/dataclasses.html#frozen-instances) | Standard library `@dataclass(frozen=true)` |
+| [record-type](https://pypi.org/project/record-type/) | A proof-of-concept `record` type for Python |
+| [record-type (C)](#record-type-c) | A C extension based on `record-type` and `msgspec` |
+| [attrs](https://www.attrs.org/en/stable/) | The venerable Python library for class generation |
+| [msgspec](https://github.com/msgspec/msgspec) | A fast serialization and validation library |
 
-<Plotly
+Each of these implementations will be evaluated with and without [mypyc](https://mypyc.readthedocs.io/) compilation, and with and without a cold start (no bytecode cache) and warm start (bytecode cache present), as relevant. Refer to the [methodology](#methodology) section for details on how the benchmarks were run.
+
+All of the implementations are tested on a struct type of 3 ints:
+
+```rust
+struct StructUnderTest {
+	a: int
+	b: int
+	c: int
+}
+```
+
+## Type Cost
+
+So, how much does it cost to _define_ a type? Remember that this cost is paid once on every **program start**, or at least at **import**.
+
+{/* <Plotly
 	{...charts.marginalPerType}
 	height={380}
-	caption="Marginal type-construction cost per class, warm. The native Final+slots class is the cheapest (~7 µs), with record-type (C) — an inheritable Record base built as a C extension (more below) — at ~9 µs, msgspec at ~10 µs, and the complete hand-written manual record at ~12 µs all close behind: none generate Python at class-creation time. A frozen dataclass costs ~37× msgspec because that work happens in C for msgspec and in interpreted codegen for the dataclass; the PyPI @record decorator (which only generates __init__) and typing.NamedTuple land in between."
+	caption="Marginal type-construction cost per type, warm. The native slots type is the cheapest at ~7 µs, with record-type (C)** at ~9 µs, msgspec at ~10 µs, and the manual record at ~12 µs all close behind: none generate Python at type-creation time. A frozen dataclass costs ~37× msgspec because that work happens in C for msgspec and in interpreted codegen for the dataclass; the PyPI @record decorator from record-type (which only generates __init__) and NamedTuple land in between."
 />
 
 Compiling the module with mypyc barely helps here: the `@dataclass` decorator
@@ -51,31 +209,32 @@ even inside the compiled extension module.
 <Plotly
 	{...charts.mypycPerType}
 	height={400}
-	caption="mypyc's effect on per-type import cost is only ~10–20%, since the decorator/metaclass work is unchanged. Strikingly, even the native Final+slots record — the one construct mypyc transforms at runtime — shows no import benefit at all (7.4→6.9 µs/type, within noise), because defining a type is dominated by CPython's PyType_Ready regardless. (attrs, msgspec, and both record-types aren't on the compiled axis here — they're defined outside the mypyc module, and record-type (C) is already a compiled extension.)"
+	caption="mypyc's effect on per-type import cost is only ~10-20%, since the decorator/metaclass work is unchanged. Strikingly, even the native Final+slots record — the one construct mypyc transforms at runtime — shows no import benefit at all (7.4→6.9 µs/type, within noise). Theory: defining a type is dominated by CPython's PyType_Ready regardless. (attrs, msgspec, and both record-types aren't on the compiled axis here — they're defined outside the mypyc module, and record-type (C) is already a compiled extension.)"
 />
 
 A cold start adds tens of microseconds per type to compile source to bytecode —
-roughly 25–55 µs here, scaling with how much source each class has. That's a
-rounding error for the code-generation-heavy frozen dataclass, but it's the
-*dominant* cost for a cheap-to-define struct like msgspec.
+roughly 25-55 µs here, scaling with how much source each class has. That's not too bad for the already slow code-generation-heavy frozen dataclass, but it's the
+*dominant* cost for a fast to define struct like `msgspec`. */}
 
 <Plotly
 	{...charts.coldWarmPerType}
 	height={400}
-	caption="Cold vs warm per-type import cost, with the mypyc-compiled cost alongside. The native record is cheapest warm (~7 µs); the complete manual record swings the most cold-to-warm of anything (12→215 µs) — far more source per class to recompile. The mypyc bar shows compiling removes the cold penalty entirely (a compiled extension has no Python source to recompile) — though it barely changes the warm cost. attrs, msgspec, and both record-types aren't on the compiled axis."
 />
 
-And the cost almost nobody budgets for: importing the library itself, once per
-process. A cold import is roughly 6–8× a warm one, because the whole transitive source
-tree has to be recompiled to bytecode — with one telling exception below.
+Many of these benefit greatly from a warm start, which is the most common use of a Python program. Cold start is included because it's the first impression that a user gets: _"how fast to `--help`?"_
+
+## Module Cost
+
+When you import your base type or decorator, you also must pay a one time cost, regardless of how many types you define, for that modules source tree. The cold import is roughly 6-8× a warm one, because the whole transitive source
+tree has to be recompiled to bytecode.
 
 <Plotly
 	{...charts.depImport}
 	height={400}
-	caption="One-time dependency import, cold vs warm. The native Final+slots record imports no library at all (a slotted class is pure builtins, and Final is erased at runtime), so it pays nothing. The standout is record-type (C): a compiled .so loads in ~0.2 ms — ~95× lighter than msgspec — and is the one dependency with no cold penalty at all (cold == warm), because a .so has no Python source to recompile. For the source-based libraries the cost is paid once regardless of how many types you define, and on a cold start it dwarfs the per-type costs above until you have hundreds of types."
+	caption="One-time dependency import, cold vs warm. The native slots record imports no library at all (a slotted class is pure builtins, and Final is erased at runtime), so it pays nothing. The standout is record-type (C): a compiled .so loads in ~0.2 ms — ~95× lighter than msgspec — and is the one dependency with no cold penalty at all (cold == warm), because a .so has no Python source to recompile."
 />
 
-## Per-instance memory
+## Instance Memory
 
 Memory is driven by object layout. Freezing a type never changes its footprint —
 `frozen=True` only changes the write path, not the storage. mypyc trades a few
@@ -85,139 +244,30 @@ speed, and gives every compiled class a fixed layout even without `__slots__`.
 <Plotly
 	{...charts.memFootprint}
 	height={400}
-	caption="Bytes per instance, measured with tracemalloc (GC header included). The control is a hand-written slotted class with Final-annotated fields — the closest thing to a native record, and what mypyc compiles most efficiently. (Final is a static-checker hint, not a runtime guard: the slot stays writable interpreted *or* compiled, so this control is fast but not actually immutable.) The complete manual record *is* genuinely immutable — but its custom __setattr__ costs mypyc the compact layout: it's the one construct that grows under compilation (64→96, vs 64→72 for the native/dataclass vtable word). record-type (C) shows the way out: a hand-built C struct that is immutable *and* compact (64 bytes, like msgspec) — no Python __setattr__ to defeat the layout. attrs, msgspec, and both record-types are defined outside the compiled module, so they have no mypyc bar."
+	caption="Bytes per instance, measured with tracemalloc (GC header included). The manual record *is* genuinely immutable — but its custom __setattr__ costs mypyc the compact layout: it's the one construct that grows under compilation (64→96, vs 64→72 for the native/dataclass vtable word). record-type (C) shows the way out: a hand-built C struct that is immutable *and* compact (64 bytes, like msgspec) — no Python __setattr__ to defeat the layout. attrs, msgspec, and both record-types are defined outside the compiled module, so they have no mypyc bar."
 />
-
-## Why doesn't mypyc compile NamedTuple to a native record?
-
-That control bar deserves a closer look. The control is a hand-written slotted
-class with `Final` fields — and it's exactly the shape mypyc turns into a *native
-extension class*: a fixed C struct, no `__dict__`, a C-level constructor.
-
-```python
-from typing import Final, NamedTuple
-
-class TPoint(NamedTuple):       # the immutable record you'd reach for
-	a: int
-	b: int
-	c: int
-
-class FPoint:                   # the control: a native immutable record
-	__slots__ = ("a", "b", "c")
-	def __init__(self, a: int, b: int, c: int) -> None:
-		self.a: Final = a
-		self.b: Final = b
-		self.c: Final = c
-```
-
-`TPoint` is also a fixed, immutable, three-field record, so you'd expect mypyc to
-give it the same native treatment. It doesn't — compiling the module changes
-*nothing* about the NamedTuple, while it transforms the plain class:
-
-| metric                | NamedTuple<br/>interpreted | NamedTuple<br/>mypyc | Final+slots<br/>interpreted | Final+slots<br/>mypyc |
-| --------------------- | :-----------------------: | :-----------------: | :------------------------: | :------------------: |
-| `isinstance(_, tuple)`| yes                       | yes                 | no                         | no                   |
-| bytes / instance      | 88                        | 88                  | 64                         | 72                   |
-| `__new__`             | 7 bytecodes               | 7 bytecodes         | C                          | C                    |
-| `__init__`            | C                         | C                   | 9 bytecodes                | C                    |
-| construct (ns)        | 138                       | 142                 | 87.5                       | 75.7                 |
-
-The NamedTuple columns are identical: same footprint, same construct time. The
-giveaway is its `__new__` — *still seven interpreted bytecodes inside the
-compiled extension module*, building a tuple and handing it to `tuple.__new__`:
-
-```text
-# TPoint.__new__ — unchanged whether interpreted or mypyc-compiled
-  1           RESUME                   0
-              LOAD_GLOBAL              1 (_tuple_new + NULL)
-              LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (_cls, a)
-              LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (b, c)
-              BUILD_TUPLE              3
-              CALL                     2
-              RETURN_VALUE
-```
-
-Contrast the native record. It has no `__new__` at all; its `__init__` writes
-the three fields straight into their slots with `STORE_ATTR` — no tuple, no
-length field, no boxed item array. (The `Final` annotations add *zero* bytecode;
-they're a pure type-checker hint, so this is byte-for-byte a plain slotted
-class.)
-
-```text
-# FPoint.__init__ — the native Final+slots record (interpreted)
- 11           RESUME                   0
-
- 12           LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (a, self)
-              STORE_ATTR               0 (a)
-
- 13           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (b, self)
-              STORE_ATTR               1 (b)
-
- 14           LOAD_FAST_BORROW_LOAD_FAST_BORROW 48 (c, self)
-              STORE_ATTR               2 (c)
-              LOAD_CONST               0 (None)
-              RETURN_VALUE
-```
-
-mypyc *does* lower this `__init__` to C — recall its 9 bytecodes became C-level in
-the compiled column. But for *this* record you barely see it in the construction
-numbers (87 → 76 ns, within run-to-run noise): the `__init__` is already three
-trivial `STORE_ATTR`s, and the interpreted `timeit` loop crosses the
-interpreter↔native boundary on every call, which caps any gain. Where compiling a
-hand-written `__init__` *does* pay off is when it does real interpreted work —
-[the complete manual record below](#a-complete-hand-written-record) routes every
-field through `object.__setattr__` and drops from 222 to 78 ns once compiled, a
-speedup a frozen `dataclass` can't get. NamedTuple's `__new__`, by contrast, stays
-interpreted even when compiled — there's nothing for mypyc to lower at all without
-breaking the tuple contract.
-
-The reason is the **tuple contract**. A `NamedTuple` instance must *be* a
-tuple — `isinstance(p, tuple)` is `True`, it unpacks (`a, b, c = p`), indexes
-(`p[0]`), compares structurally against plain tuples, and hashes like one.
-mypyc's native record is a fixed C struct that is *not* a tuple, so it cannot
-represent a NamedTuple without breaking all of that. mypyc recognizes
-`NamedTuple` as a special base but otherwise leaves it as stock CPython: a tuple
-subclass whose generated `__new__` runs interpreted. You pay the tuple layout (a
-length field plus boxed `PyObject *` slots — 88 vs 64 bytes) and an interpreted
-constructor, compiled or not.
-
-The practical upshot: a `NamedTuple` gives you immutability but never mypyc's
-native-record speed and footprint — it stays a tuple. mypyc *will* lower a
-`Final`-annotated slotted class to a native struct (compact, C-level
-constructor), but that class isn't immutable at runtime — `Final` is checked only
-by the type checker, and the compiled slot is still writable (`o.a = 99` succeeds
-on the `.so`). The one construct that delivers genuine, runtime-enforced
-immutability *and* a native C layout is a purpose-built C struct like
-`msgspec.Struct`. (One caveat on the access numbers: mypyc's attribute-access
-speedups show up on the compiled→compiled call path; when interpreted code
-reaches into a compiled class, as the benchmark loop does, you don't see them.)
 
 ## The cost of immutability
 
-If immutability is what you're after, the three axes tell one story: **msgspec
-gives you immutability for free everywhere**, `typing.NamedTuple` is the cheap
-standard-library option, and `dataclass(frozen=True)` is the most expensive way
-to be immutable.
+Immutability sometimes costs time or space and is never more efficient.
 
 <Plotly
 	{...charts.immMemory}
 	height={380}
-	caption="Memory: immutability costs nothing per family. The frozen (mypyc) bar shows mypyc's memory cost — an extra 8-byte vtable word per native instance (64→72 for the control and the dataclass); the complete manual record pays more (64→96) because its custom __setattr__ defeats the compact layout. record-type (C) avoids that — a hand-built C struct, immutable and a compact 64 bytes (like msgspec). NamedTuple stays a tuple either way (88); attrs, msgspec, and both record-types are off the compiled axis. typing.NamedTuple, the manual record, and both record-types have no mutable counterpart, so their mutable bar is absent."
-/>
-
-<Plotly
-	{...charts.immInstantiation}
-	height={380}
-	caption="Instantiation: freezing roughly doubles construction for dataclass, attrs, the PyPI record-type, and the manual record — all route every field through object.__setattr__ — but is free for msgspec and record-type (C) (both write straight to slots in C) and NamedTuple (immutable by construction). The mypyc bar shows exactly when compiling helps: it barely moves the already-trivial native (87→76, within noise) and can't touch dataclass's runtime-generated __init__ (224→226), but it cuts the hand-written manual record ~3× (222→78) by lowering its object.__setattr__ init to native stores — the one construction speedup a frozen dataclass can't get. attrs, msgspec, and both record-types are off the compiled axis (the PyPI record-type mypyc can't compile at all; record-type (C) is already a C extension)."
 />
 
 <Plotly
 	{...charts.immImport}
 	height={380}
-	caption="Import / type-construction: freezing adds ~60% for dataclass and ~15% for attrs (extra generated methods), and is essentially free for msgspec. The plain/Final control is cheapest of all (~7 µs, mutable or frozen) — a hand-written slotted class generates no methods at definition time — with record-type (C) close behind at ~9 µs. The frozen (mypyc) bar barely moves any of it (the native record is 7.4→6.9 µs — within noise): defining a type is dominated by CPython's PyType_Ready, compiled or not."
+	caption="Import / type-construction: freezing adds ~60% for dataclass and ~15% for attrs (extra generated methods), and is essentially free for msgspec."
 />
 
-### Why frozen is slower to construct
+<Plotly
+	{...charts.immInstantiation}
+	height={380}
+/>
+
+{/* ### Why frozen is slower to construct
 
 The instantiation penalty is visible in the generated `__init__`. A mutable
 slotted dataclass stores each field with a single `STORE_ATTR`; a *frozen* one
@@ -276,7 +326,64 @@ field. Flip between them:
 
 Nine instructions become twenty-five. `msgspec` and `NamedTuple` sidestep this
 entirely — neither has an interpreted `__init__` to run; construction bottoms
-out in C.
+out in C. */}
+
+## NamedTuple in mypyc
+
+I was really hoping that mypyc was going to compile NamedTuple to a native struct. Compiling the module changes *almost nothing* about the `NamedTuple`, while it transforms `native slots`:
+
+| metric                | NamedTuple<br/>interpreted | NamedTuple<br/>mypyc | native slots<br/>interpreted | native slots<br/>mypyc |
+| --------------------- | :-----------------------: | :-----------------: | :------------------------: | :------------------: |
+| `isinstance(_, tuple)`| yes                       | yes                 | no                         | no                   |
+| bytes / instance      | 88                        | 88                  | 64                         | 72                   |
+| `__new__`             | 7 bytecodes               | 7 bytecodes         | C                          | C                    |
+| `__init__`            | C                         | C                   | 9 bytecodes                | C                    |
+| instance (ns)        | 138                       | 142                 | 87.5                       | 75.7                 |
+
+The NamedTuple columns are identical: same footprint, same construct time. Its' `__new__` is still seven interpreted bytecodes inside the compiled extension module, building a tuple and handing it to `tuple.__new__`:
+
+```text
+1 RESUME                            0
+  LOAD_GLOBAL                       1 (_tuple_new + NULL)
+  LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (_cls, a)
+  LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (b, c)
+  BUILD_TUPLE                       3
+  CALL                              2
+  RETURN_VALUE
+```
+
+Contrast the native record. It has no `__new__` at all; its `__init__` writes
+the three fields straight into their slots with `STORE_ATTR` — no tuple, no
+length field, no boxed item array. (The `Final` annotations add *zero* bytecode;
+they're a pure type-checker hint, so this is byte-for-byte a plain slotted
+class.)
+
+```text
+11 RESUME                   0
+12 LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (a, self)
+   STORE_ATTR               0 (a)
+13 LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (b, self)
+   STORE_ATTR               1 (b)
+14 LOAD_FAST_BORROW_LOAD_FAST_BORROW 48 (c, self)
+   STORE_ATTR               2 (c)
+   LOAD_CONST               0 (None)
+   RETURN_VALUE
+```
+
+mypyc *does* lower this `__init__` to C — recall its 9 bytecodes became C-level in
+the compiled column. But for *this* record you barely see it in the construction
+numbers (87 → 76 ns, within run-to-run noise): the `__init__` is only three `STORE_ATTR`s, and the interpreted `timeit` loop crosses the
+interpreter↔native boundary on every call, which caps any gain. Where compiling a
+hand-written `__init__` *does* pay off is when it does real interpreted work —
+[manual record](#manual-record) routes every
+field through `object.__setattr__` and drops from 222 to 78 ns once compiled, a
+speedup a frozen `dataclass` can't get. NamedTuple's `__new__`, by contrast, stays
+interpreted even when compiled and there's nothing for mypyc to lower at all without
+breaking the tuple contract.
+
+So, I've been right to reach for `NamedTuple` as a cheaper immutable type than `dataclass(frozen=True)`, but I was wrong to think that it was _perfectly_ efficient and compact like a C struct.
+
+
 
 ## When does msgspec overtake NamedTuple?
 
@@ -475,6 +582,15 @@ without its import — though genuinely unboxed values stay the mypyc issue's
 domain, and it isn't on PyPI yet regardless.
 
 ## Methodology
+
+> [!WARNING] LLM acknowledgement
+> 
+> The benchmark suite was written by a large language model (LLM) driven by the author's design. The methodology section below was written by the same LLM, with the same context, and was reviewed by the author.
+>
+> Model ID: `claude-opus-4.8`
+
+[Source Code](https://github.com/JPhutchins/python-struct-profiling)
+
 
 All measurements were taken on a single machine: CPython 3.14.0 (installed and
 managed with [uv](https://docs.astral.sh/uv/)), mypy/mypyc 2.1.0, attrs 26.1.0,

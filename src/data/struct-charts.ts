@@ -218,8 +218,26 @@ export const CONSTRUCTS: Construct[] = [
 ];
 
 const byKey: Record<string, Construct> = Object.fromEntries(CONSTRUCTS.map((c) => [c.key, c]));
-const FOCUS = ["native", "manualrecord", "recordtype", "recordc", "namedtuple", "dataclass", "attrs", "msgspec"];
-const IMM = ["native", "manualrecord", "recordtype", "recordc", "dataclass", "attrs", "msgspec", "namedtuple"];
+const FOCUS = [
+	"native",
+	"manualrecord",
+	"recordtype",
+	"recordc",
+	"namedtuple",
+	"dataclass",
+	"attrs",
+	"msgspec",
+];
+const IMM = [
+	"native",
+	"manualrecord",
+	"recordtype",
+	"recordc",
+	"dataclass",
+	"attrs",
+	"msgspec",
+	"namedtuple",
+];
 const order = (keys: string[]): Construct[] => keys.map((k) => byKey[k]);
 
 // NamedTuple↔msgspec crossover, derived so the annotation can't drift from the
@@ -237,11 +255,11 @@ type Spec = { data: unknown[]; layout: Record<string, unknown> };
 
 const PALETTE = {
 	interpreted: "#4C72B0",
-	compiled: "#DD8452",
+	compiled: "#741d49",
 	mutable: "#55A868",
-	frozen: "#C44E52",
-	warm: "#55A868",
-	cold: "#C44E52",
+	frozen: "#522224",
+	warm: "#cf6588",
+	cold: "#73c9cf",
 	single: "#4C72B0",
 	namedtuple: "#4C72B0",
 	dataclass: "#C44E52",
@@ -287,16 +305,30 @@ const groupedBar = (
 
 export const marginalPerType = groupedBar(
 	order(FOCUS).map((c) => c.label),
-	[{ name: "µs/type", color: PALETTE.single, values: order(FOCUS).map((c) => c.frozen.importUs.warm) }],
-	"microseconds per class (warm)",
+	[
+		{
+			name: "µs/type",
+			color: PALETTE.warm,
+			values: order(FOCUS).map((c) => c.frozen.importUs.warm),
+		},
+	],
+	"microseconds per type (warm)",
 	{ showlegend: false },
 );
 
 export const mypycPerType = groupedBar(
 	order(FOCUS).map((c) => c.label),
 	[
-		{ name: "interpreted", color: PALETTE.interpreted, values: order(FOCUS).map((c) => c.frozen.importUs.warm) },
-		{ name: "mypyc-compiled", color: PALETTE.compiled, values: order(FOCUS).map((c) => c.frozen.importUs.mypyc) },
+		{
+			name: "interpreted (warm)",
+			color: PALETTE.warm,
+			values: order(FOCUS).map((c) => c.frozen.importUs.warm),
+		},
+		{
+			name: "mypyc-compiled",
+			color: PALETTE.compiled,
+			values: order(FOCUS).map((c) => c.frozen.importUs.mypyc),
+		},
 	],
 	"microseconds per type (import, warm)",
 );
@@ -304,18 +336,38 @@ export const mypycPerType = groupedBar(
 export const coldWarmPerType = groupedBar(
 	order(FOCUS).map((c) => c.label),
 	[
-		{ name: "cold (recompile source)", color: PALETTE.cold, values: order(FOCUS).map((c) => c.frozen.importUs.cold) },
-		{ name: "warm (cached bytecode)", color: PALETTE.warm, values: order(FOCUS).map((c) => c.frozen.importUs.warm) },
-		{ name: "mypyc-compiled", color: PALETTE.compiled, values: order(FOCUS).map((c) => c.frozen.importUs.mypyc) },
+		{
+			name: "cold (recompile bytecode)",
+			color: PALETTE.cold,
+			values: order(FOCUS).map((c) => c.frozen.importUs.cold),
+		},
+		{
+			name: "warm (cached bytecode)",
+			color: PALETTE.warm,
+			values: order(FOCUS).map((c) => c.frozen.importUs.warm),
+		},
+		{
+			name: "mypyc-compiled",
+			color: PALETTE.compiled,
+			values: order(FOCUS).map((c) => c.frozen.importUs.mypyc),
+		},
 	],
-	"microseconds per type (import)",
+	"microseconds per type",
 );
 
 export const depImport = groupedBar(
 	order(FOCUS).map((c) => c.depLabel),
 	[
-		{ name: "cold (no cached bytecode)", color: PALETTE.cold, values: order(FOCUS).map((c) => c.depMs.cold) },
-		{ name: "warm (cached bytecode)", color: PALETTE.warm, values: order(FOCUS).map((c) => c.depMs.warm) },
+		{
+			name: "cold (no cached bytecode)",
+			color: PALETTE.cold,
+			values: order(FOCUS).map((c) => c.depMs.cold),
+		},
+		{
+			name: "warm (cached bytecode)",
+			color: PALETTE.warm,
+			values: order(FOCUS).map((c) => c.depMs.warm),
+		},
 	],
 	"milliseconds (cumulative, fresh interpreter)",
 );
@@ -324,22 +376,43 @@ export const depImport = groupedBar(
 export const memFootprint = groupedBar(
 	order(FOCUS).map((c) => c.label),
 	[
-		{ name: "interpreted", color: PALETTE.interpreted, values: order(FOCUS).map((c) => c.frozen.memBytes.interp) },
-		{ name: "mypyc-compiled", color: PALETTE.compiled, values: order(FOCUS).map((c) => c.frozen.memBytes.mypyc) },
+		{
+			name: "interpreted",
+			color: PALETTE.interpreted,
+			values: order(FOCUS).map((c) => c.frozen.memBytes.interp),
+		},
+		{
+			name: "mypyc-compiled",
+			color: PALETTE.compiled,
+			values: order(FOCUS).map((c) => c.frozen.memBytes.mypyc),
+		},
 	],
 	"bytes per instance",
 	{ fmt: ".0f" },
 );
 
 // --- Figure 3: cost of immutability --------------------------------------
-const mut = <T>(c: Construct, pick: (v: Variant) => T): T | null => (c.mutable ? pick(c.mutable) : null);
+const mut = <T>(c: Construct, pick: (v: Variant) => T): T | null =>
+	c.mutable ? pick(c.mutable) : null;
 
 export const immMemory = groupedBar(
 	order(IMM).map((c) => c.immLabel),
 	[
-		{ name: "mutable (interpreted)", color: PALETTE.mutable, values: order(IMM).map((c) => mut(c, (v) => v.memBytes.interp)) },
-		{ name: "frozen (interpreted)", color: PALETTE.frozen, values: order(IMM).map((c) => c.frozen.memBytes.interp) },
-		{ name: "frozen (mypyc)", color: PALETTE.compiled, values: order(IMM).map((c) => c.frozen.memBytes.mypyc) },
+		{
+			name: "mutable (interpreted)",
+			color: PALETTE.warm,
+			values: order(IMM).map((c) => mut(c, (v) => v.memBytes.interp)),
+		},
+		{
+			name: "frozen (interpreted)",
+			color: PALETTE.frozen,
+			values: order(IMM).map((c) => c.frozen.memBytes.interp),
+		},
+		{
+			name: "frozen (mypyc)",
+			color: PALETTE.compiled,
+			values: order(IMM).map((c) => c.frozen.memBytes.mypyc),
+		},
 	],
 	"bytes per instance",
 	{ fmt: ".0f" },
@@ -348,9 +421,21 @@ export const immMemory = groupedBar(
 export const immInstantiation = groupedBar(
 	order(IMM).map((c) => c.immLabel),
 	[
-		{ name: "mutable (interpreted)", color: PALETTE.mutable, values: order(IMM).map((c) => mut(c, (v) => v.instNs.interp)) },
-		{ name: "frozen (interpreted)", color: PALETTE.frozen, values: order(IMM).map((c) => c.frozen.instNs.interp) },
-		{ name: "frozen (mypyc)", color: PALETTE.compiled, values: order(IMM).map((c) => c.frozen.instNs.mypyc) },
+		{
+			name: "mutable (interpreted)",
+			color: PALETTE.warm,
+			values: order(IMM).map((c) => mut(c, (v) => v.instNs.interp)),
+		},
+		{
+			name: "frozen (interpreted)",
+			color: PALETTE.frozen,
+			values: order(IMM).map((c) => c.frozen.instNs.interp),
+		},
+		{
+			name: "frozen (mypyc)",
+			color: PALETTE.compiled,
+			values: order(IMM).map((c) => c.frozen.instNs.mypyc),
+		},
 	],
 	"nanoseconds per instantiation",
 );
@@ -358,11 +443,23 @@ export const immInstantiation = groupedBar(
 export const immImport = groupedBar(
 	order(IMM).map((c) => c.immLabel),
 	[
-		{ name: "mutable (interpreted)", color: PALETTE.mutable, values: order(IMM).map((c) => mut(c, (v) => v.importUs.warm)) },
-		{ name: "frozen (interpreted)", color: PALETTE.frozen, values: order(IMM).map((c) => c.frozen.importUs.warm) },
-		{ name: "frozen (mypyc)", color: PALETTE.compiled, values: order(IMM).map((c) => c.frozen.importUs.mypyc) },
+		{
+			name: "mutable (interpreted)",
+			color: PALETTE.warm,
+			values: order(IMM).map((c) => mut(c, (v) => v.importUs.warm)),
+		},
+		{
+			name: "frozen (interpreted)",
+			color: PALETTE.frozen,
+			values: order(IMM).map((c) => c.frozen.importUs.warm),
+		},
+		{
+			name: "frozen (mypyc)",
+			color: PALETTE.compiled,
+			values: order(IMM).map((c) => c.frozen.importUs.mypyc),
+		},
 	],
-	"microseconds per class (import, warm)",
+	"microseconds per type (import, warm)",
 );
 
 // --- Figure 4: startup crossover (fat curve) -----------------------------
