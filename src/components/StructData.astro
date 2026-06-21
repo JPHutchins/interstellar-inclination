@@ -5,7 +5,7 @@
  * charts derive from). Drop `<StructData />` into the methodology section; the
  * tables can never disagree with the figures because both read one array.
  */
-import { CONSTRUCTS, crossover } from "@data/struct-charts";
+import { CONSTRUCTS, orderedConstructs, crossover } from "@data/struct-charts";
 
 const strip = (s: string) => s.replace(/<br\/?>/g, " ");
 
@@ -13,7 +13,7 @@ type Variant = (typeof CONSTRUCTS)[number]["frozen"];
 type Row = { construct: string; variant: string; v: Variant };
 
 // One row per (construct, variant); NamedTuple has no mutable form.
-const rows: Row[] = CONSTRUCTS.flatMap((c) => [
+const rows: Row[] = orderedConstructs.flatMap((c) => [
 	...(c.mutable ? [{ construct: strip(c.tableLabel), variant: "mutable", v: c.mutable }] : []),
 	{ construct: strip(c.tableLabel), variant: "frozen", v: c.frozen },
 ]);
@@ -57,7 +57,7 @@ const bc = (x: number | "C") => (x === "C" ? "C" : String(x));
 			<tr><th>library</th><th>warm</th><th>cold</th></tr>
 		</thead>
 		<tbody>
-			{CONSTRUCTS.map((c) => (
+			{orderedConstructs.map((c) => (
 				<tr>
 					<td>{strip(c.depLabel)}</td>
 					<td>{num(c.depMs.warm)}</td>
@@ -123,7 +123,7 @@ const bc = (x: number | "C") => (x === "C" ? "C" : String(x));
 			<tr><th>construct</th><th><code>__new__</code></th><th><code>__init__</code> (mutable)</th><th><code>__init__</code> (frozen)</th></tr>
 		</thead>
 		<tbody>
-			{CONSTRUCTS.map((c) => (
+			{orderedConstructs.map((c) => (
 				<tr>
 					<td>{strip(c.tableLabel)}</td>
 					<td>{bc(c.newBytecode)}</td>

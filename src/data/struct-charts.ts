@@ -56,10 +56,10 @@ type Construct = {
 export const CONSTRUCTS: Construct[] = [
 	{
 		key: "native",
-		label: "native<br>(Final + slots)",
-		immLabel: "plain / Final<br>(control)",
+		label: "native<br>slots",
+		immLabel: "native<br>slots",
 		depLabel: "native<br>(none)",
-		tableLabel: "native (slots)",
+		tableLabel: "native slots",
 		depMs: { warm: 0, cold: 0 },
 		newBytecode: "C",
 		mutable: {
@@ -83,7 +83,7 @@ export const CONSTRUCTS: Construct[] = [
 		label: "manual<br>record",
 		immLabel: "manual<br>record",
 		depLabel: "manual<br>(none)",
-		tableLabel: "manual record-type",
+		tableLabel: "manual record",
 		depMs: { warm: 0, cold: 0 },
 		newBytecode: "C",
 		mutable: null,
@@ -99,10 +99,10 @@ export const CONSTRUCTS: Construct[] = [
 		// __hash__/__repr__ are inherited from a Record base (no per-class
 		// codegen). mypyc can't compile it (decorator returns a class).
 		key: "recordtype",
-		label: "record-type<br>(PyPI)",
-		immLabel: "record-type<br>(PyPI)",
-		depLabel: "records",
-		tableLabel: "record-type (PyPI)",
+		label: "record-type",
+		immLabel: "record-type",
+		depLabel: "record-type",
+		tableLabel: "record-type",
 		depMs: { warm: 12.5, cold: 91.3 },
 		newBytecode: "C",
 		mutable: null,
@@ -124,7 +124,7 @@ export const CONSTRUCTS: Construct[] = [
 		key: "recordc",
 		label: "record-type<br>(C)",
 		immLabel: "record-type<br>(C)",
-		depLabel: "native_record<br>(C ext)",
+		depLabel: "record-type<br>(C)",
 		tableLabel: "record-type (C)",
 		depMs: { warm: 0.2, cold: 0.2 },
 		newBytecode: "C",
@@ -138,10 +138,10 @@ export const CONSTRUCTS: Construct[] = [
 	},
 	{
 		key: "namedtuple",
-		label: "typing.<br>NamedTuple",
-		immLabel: "typing.<br>NamedTuple",
+		label: "NamedTuple",
+		immLabel: "NamedTuple",
 		depLabel: "typing",
-		tableLabel: "typing.NamedTuple",
+		tableLabel: "NamedTuple",
 		depMs: { warm: 4.0, cold: 33.9 },
 		newBytecode: 7,
 		mutable: null,
@@ -154,10 +154,10 @@ export const CONSTRUCTS: Construct[] = [
 	},
 	{
 		key: "dataclass",
-		label: "dataclass<br>frozen + slots",
-		immLabel: "dataclass<br>(slots)",
+		label: "frozen<br>dataclass",
+		immLabel: "dataclass",
 		depLabel: "dataclasses",
-		tableLabel: "dataclass (slots)",
+		tableLabel: "dataclass",
 		depMs: { warm: 11.5, cold: 81.9 },
 		newBytecode: "C",
 		mutable: {
@@ -175,10 +175,10 @@ export const CONSTRUCTS: Construct[] = [
 	},
 	{
 		key: "attrs",
-		label: "attrs<br>frozen + slots",
-		immLabel: "attrs<br>(slots)",
+		label: "attrs",
+		immLabel: "attrs",
 		depLabel: "attrs",
-		tableLabel: "attrs (slots)",
+		tableLabel: "attrs",
 		depMs: { warm: 22.2, cold: 128.5 },
 		newBytecode: "C",
 		mutable: {
@@ -196,7 +196,7 @@ export const CONSTRUCTS: Construct[] = [
 	},
 	{
 		key: "msgspec",
-		label: "msgspec<br>frozen",
+		label: "msgspec",
 		immLabel: "msgspec",
 		depLabel: "msgspec",
 		tableLabel: "msgspec",
@@ -218,27 +218,39 @@ export const CONSTRUCTS: Construct[] = [
 ];
 
 const byKey: Record<string, Construct> = Object.fromEntries(CONSTRUCTS.map((c) => [c.key, c]));
-const FOCUS = [
+// Canonical implementation order — matches the SUTs table in the post. One list,
+// used everywhere, so chart/table ordering can't drift.
+const ORDER = [
 	"native",
 	"manualrecord",
-	"recordtype",
-	"recordc",
 	"namedtuple",
 	"dataclass",
-	"attrs",
-	"msgspec",
-];
-const IMM = [
-	"native",
-	"manualrecord",
 	"recordtype",
 	"recordc",
-	"dataclass",
 	"attrs",
 	"msgspec",
-	"namedtuple",
 ];
 const order = (keys: string[]): Construct[] => keys.map((k) => byKey[k]);
+
+// Constructs in canonical order, for the raw-data tables (<StructData />).
+export const orderedConstructs = order(ORDER);
+
+// Per-construct bar rows for the Type / Instance / Memory charts: one bar per SUT
+// in table order, using each construct's representative (frozen) variant — except
+// dataclass, the one construct the table splits into mutable + frozen, which
+// contributes two bars. Names come from the canonical labels above.
+type Row = { name: string; v: Variant };
+const ROWS: Row[] = [
+	{ name: byKey.native.label, v: byKey.native.frozen },
+	{ name: byKey.manualrecord.label, v: byKey.manualrecord.frozen },
+	{ name: byKey.namedtuple.label, v: byKey.namedtuple.frozen },
+	{ name: "dataclass", v: byKey.dataclass.mutable as Variant },
+	{ name: byKey.dataclass.label, v: byKey.dataclass.frozen },
+	{ name: byKey.recordtype.label, v: byKey.recordtype.frozen },
+	{ name: byKey.recordc.label, v: byKey.recordc.frozen },
+	{ name: byKey.attrs.label, v: byKey.attrs.frozen },
+	{ name: byKey.msgspec.label, v: byKey.msgspec.frozen },
+];
 
 // NamedTuple↔msgspec crossover, derived so the annotation can't drift from the
 // data: N where dep_a + N*per_a == dep_b + N*per_b (dep in ms, per-type in us).
@@ -304,12 +316,12 @@ const groupedBar = (
 // --- Figure 1: import / type-construction --------------------------------
 
 export const marginalPerType = groupedBar(
-	order(FOCUS).map((c) => c.label),
+	ROWS.map((r) => r.name),
 	[
 		{
 			name: "µs/type",
 			color: PALETTE.warm,
-			values: order(FOCUS).map((c) => c.frozen.importUs.warm),
+			values: ROWS.map((r) => r.v.importUs.warm),
 		},
 	],
 	"microseconds per type (warm)",
@@ -317,77 +329,78 @@ export const marginalPerType = groupedBar(
 );
 
 export const mypycPerType = groupedBar(
-	order(FOCUS).map((c) => c.label),
+	ROWS.map((r) => r.name),
 	[
 		{
 			name: "interpreted (warm)",
 			color: PALETTE.warm,
-			values: order(FOCUS).map((c) => c.frozen.importUs.warm),
+			values: ROWS.map((r) => r.v.importUs.warm),
 		},
 		{
 			name: "mypyc-compiled",
 			color: PALETTE.compiled,
-			values: order(FOCUS).map((c) => c.frozen.importUs.mypyc),
+			values: ROWS.map((r) => r.v.importUs.mypyc),
 		},
 	],
 	"microseconds per type (import, warm)",
 );
 
 export const coldWarmPerType = groupedBar(
-	order(FOCUS).map((c) => c.label),
+	ROWS.map((r) => r.name),
 	[
 		{
 			name: "cold (recompile bytecode)",
 			color: PALETTE.cold,
-			values: order(FOCUS).map((c) => c.frozen.importUs.cold),
+			values: ROWS.map((r) => r.v.importUs.cold),
 		},
 		{
 			name: "warm (cached bytecode)",
 			color: PALETTE.warm,
-			values: order(FOCUS).map((c) => c.frozen.importUs.warm),
+			values: ROWS.map((r) => r.v.importUs.warm),
 		},
 		{
 			name: "mypyc-compiled",
 			color: PALETTE.compiled,
-			values: order(FOCUS).map((c) => c.frozen.importUs.mypyc),
+			values: ROWS.map((r) => r.v.importUs.mypyc),
 		},
 	],
 	"microseconds per type",
 );
 
 export const depImport = groupedBar(
-	order(FOCUS).map((c) => c.depLabel),
+	order(ORDER).map((c) => c.depLabel),
 	[
 		{
 			name: "cold (no cached bytecode)",
 			color: PALETTE.cold,
-			values: order(FOCUS).map((c) => c.depMs.cold),
+			values: order(ORDER).map((c) => c.depMs.cold),
 		},
 		{
 			name: "warm (cached bytecode)",
 			color: PALETTE.warm,
-			values: order(FOCUS).map((c) => c.depMs.warm),
+			values: order(ORDER).map((c) => c.depMs.warm),
 		},
 	],
 	"milliseconds (cumulative, fresh interpreter)",
 );
 
 // --- per-instance construction time (ns) ---------------------------------
-// Parallel to memFootprint but for instantiation: FOCUS framing, frozen
-// variant, interpreted vs mypyc. (Cold/warm is a bytecode-cache effect on
-// import, not on a runtime per-instance op, so it does not apply here.)
+// Parallel to memFootprint but for instantiation: table order, interpreted vs
+// mypyc, dataclass split into mutable + frozen like the other per-construct
+// charts. (Cold/warm is a bytecode-cache effect on import, not on a runtime
+// per-instance op, so it does not apply here.)
 export const instCost = groupedBar(
-	order(FOCUS).map((c) => c.label),
+	ROWS.map((r) => r.name),
 	[
 		{
 			name: "interpreted",
 			color: PALETTE.warm,
-			values: order(FOCUS).map((c) => c.frozen.instNs.interp),
+			values: ROWS.map((r) => r.v.instNs.interp),
 		},
 		{
 			name: "mypyc-compiled",
 			color: PALETTE.compiled,
-			values: order(FOCUS).map((c) => c.frozen.instNs.mypyc),
+			values: ROWS.map((r) => r.v.instNs.mypyc),
 		},
 	],
 	"nanoseconds per instantiation",
@@ -395,17 +408,17 @@ export const instCost = groupedBar(
 
 // --- Figure 2: per-instance memory (bytes → integers) --------------------
 export const memFootprint = groupedBar(
-	order(FOCUS).map((c) => c.label),
+	ROWS.map((r) => r.name),
 	[
 		{
 			name: "interpreted",
 			color: PALETTE.interpreted,
-			values: order(FOCUS).map((c) => c.frozen.memBytes.interp),
+			values: ROWS.map((r) => r.v.memBytes.interp),
 		},
 		{
 			name: "mypyc-compiled",
 			color: PALETTE.compiled,
-			values: order(FOCUS).map((c) => c.frozen.memBytes.mypyc),
+			values: ROWS.map((r) => r.v.memBytes.mypyc),
 		},
 	],
 	"bytes per instance",
@@ -417,22 +430,22 @@ const mut = <T>(c: Construct, pick: (v: Variant) => T): T | null =>
 	c.mutable ? pick(c.mutable) : null;
 
 export const immMemory = groupedBar(
-	order(IMM).map((c) => c.immLabel),
+	order(ORDER).map((c) => c.immLabel),
 	[
 		{
 			name: "mutable (interpreted)",
 			color: PALETTE.warm,
-			values: order(IMM).map((c) => mut(c, (v) => v.memBytes.interp)),
+			values: order(ORDER).map((c) => mut(c, (v) => v.memBytes.interp)),
 		},
 		{
 			name: "frozen (interpreted)",
 			color: PALETTE.frozen,
-			values: order(IMM).map((c) => c.frozen.memBytes.interp),
+			values: order(ORDER).map((c) => c.frozen.memBytes.interp),
 		},
 		{
 			name: "frozen (mypyc)",
 			color: PALETTE.compiled,
-			values: order(IMM).map((c) => c.frozen.memBytes.mypyc),
+			values: order(ORDER).map((c) => c.frozen.memBytes.mypyc),
 		},
 	],
 	"bytes per instance",
@@ -440,44 +453,44 @@ export const immMemory = groupedBar(
 );
 
 export const immInstantiation = groupedBar(
-	order(IMM).map((c) => c.immLabel),
+	order(ORDER).map((c) => c.immLabel),
 	[
 		{
 			name: "mutable (interpreted)",
 			color: PALETTE.warm,
-			values: order(IMM).map((c) => mut(c, (v) => v.instNs.interp)),
+			values: order(ORDER).map((c) => mut(c, (v) => v.instNs.interp)),
 		},
 		{
 			name: "frozen (interpreted)",
 			color: PALETTE.frozen,
-			values: order(IMM).map((c) => c.frozen.instNs.interp),
+			values: order(ORDER).map((c) => c.frozen.instNs.interp),
 		},
 		{
 			name: "frozen (mypyc)",
 			color: PALETTE.compiled,
-			values: order(IMM).map((c) => c.frozen.instNs.mypyc),
+			values: order(ORDER).map((c) => c.frozen.instNs.mypyc),
 		},
 	],
 	"nanoseconds per instantiation",
 );
 
 export const immImport = groupedBar(
-	order(IMM).map((c) => c.immLabel),
+	order(ORDER).map((c) => c.immLabel),
 	[
 		{
 			name: "mutable (interpreted)",
 			color: PALETTE.warm,
-			values: order(IMM).map((c) => mut(c, (v) => v.importUs.warm)),
+			values: order(ORDER).map((c) => mut(c, (v) => v.importUs.warm)),
 		},
 		{
 			name: "frozen (interpreted)",
 			color: PALETTE.frozen,
-			values: order(IMM).map((c) => c.frozen.importUs.warm),
+			values: order(ORDER).map((c) => c.frozen.importUs.warm),
 		},
 		{
 			name: "frozen (mypyc)",
 			color: PALETTE.compiled,
-			values: order(IMM).map((c) => c.frozen.importUs.mypyc),
+			values: order(ORDER).map((c) => c.frozen.importUs.mypyc),
 		},
 	],
 	"microseconds per type (import, warm)",
@@ -507,14 +520,15 @@ const nativeMypyc = (c: Construct): CrossSeries => ({
 });
 
 const CROSS: Record<string, CrossSeries> = {
-	"Final+slots (interpreted)": band(byKey.native),
-	"Final+slots (mypyc)": nativeMypyc(byKey.native),
-	"manual record (immutable)": band(byKey.manualrecord),
+	"native slots": band(byKey.native),
+	"native slots (mypyc)": nativeMypyc(byKey.native),
+	"manual record": band(byKey.manualrecord),
+	NamedTuple: band(byKey.namedtuple),
+	"frozen dataclass": band(byKey.dataclass),
+	"record-type": band(byKey.recordtype),
 	"record-type (C)": band(byKey.recordc),
-	"typing.NamedTuple": band(byKey.namedtuple),
-	"dataclass frozen + slots": band(byKey.dataclass),
-	"attrs frozen + slots": band(byKey.attrs),
-	"msgspec frozen": band(byKey.msgspec),
+	attrs: band(byKey.attrs),
+	msgspec: band(byKey.msgspec),
 };
 
 const N_POINTS = Array.from({ length: 90 }, (_, i) => 2 ** ((i / 89) * 12.4));
