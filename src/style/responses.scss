@@ -58,6 +58,18 @@
 	transform: rotate(90deg);
 }
 
+.responses-summary-hide {
+	display: none;
+}
+
+.responses-details[open] .responses-summary-show {
+	display: none;
+}
+
+.responses-details[open] .responses-summary-hide {
+	display: inline;
+}
+
 .responses-channels {
 	margin-top: 1.5rem;
 }
