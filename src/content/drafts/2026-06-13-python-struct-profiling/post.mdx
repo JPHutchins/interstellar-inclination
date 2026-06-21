@@ -245,6 +245,9 @@ Looking just at the warm start, we can start to see 3 performance tiers:
 2. ~76-96 µs (~8× slower): `NamedTuple`, `record-type`
 3. ~200-370 µs (~20-30× slower): `dataclass`, `dataclass(frozen=True)`, `attrs`
 
+The tiers come down to [how many methods each implementation has to generate when the
+type is defined](#why-three-type-cost-tiers).
+
 Use the table below to sort relative performance.
 
 <RatioTable
@@ -404,61 +407,6 @@ Nine instructions become twenty-five. `msgspec` and `NamedTuple` sidestep this
 entirely — neither has an interpreted `__init__` to run; construction bottoms
 out in C. */}
 
-### NamedTuple in mypyc
-
-I was really hoping that mypyc was going to compile NamedTuple to a native struct. Compiling the module changes *almost nothing* about the `NamedTuple`, while it transforms `native slots`:
-
-| metric                | NamedTuple<br/>interpreted | NamedTuple<br/>mypyc | native slots<br/>interpreted | native slots<br/>mypyc |
-| --------------------- | :-----------------------: | :-----------------: | :------------------------: | :------------------: |
-| `isinstance(_, tuple)`| yes                       | yes                 | no                         | no                   |
-| bytes / instance      | 88                        | 88                  | 64                         | 72                   |
-| `__new__`             | 7 bytecodes               | 7 bytecodes         | C                          | C                    |
-| `__init__`            | C                         | C                   | 9 bytecodes                | C                    |
-| instance (ns)        | 138                       | 142                 | 87.5                       | 75.7                 |
-
-The NamedTuple columns are identical: same footprint, same construct time. Its' `__new__` is still seven interpreted bytecodes inside the compiled extension module, building a tuple and handing it to `tuple.__new__`:
-
-```text
-1 RESUME                            0
-  LOAD_GLOBAL                       1 (_tuple_new + NULL)
-  LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (_cls, a)
-  LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (b, c)
-  BUILD_TUPLE                       3
-  CALL                              2
-  RETURN_VALUE
-```
-
-Contrast the native record. It has no `__new__` at all; its `__init__` writes
-the three fields straight into their slots with `STORE_ATTR` — no tuple, no
-length field, no boxed item array. (The `Final` annotations add *zero* bytecode;
-they're a pure type-checker hint, so this is byte-for-byte a plain slotted
-class.)
-
-```text
-11 RESUME                   0
-12 LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (a, self)
-   STORE_ATTR               0 (a)
-13 LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (b, self)
-   STORE_ATTR               1 (b)
-14 LOAD_FAST_BORROW_LOAD_FAST_BORROW 48 (c, self)
-   STORE_ATTR               2 (c)
-   LOAD_CONST               0 (None)
-   RETURN_VALUE
-```
-
-mypyc *does* lower this `__init__` to C — recall its 9 bytecodes became C-level in
-the compiled column. But for *this* record you barely see it in the construction
-numbers (87 → 76 ns, within run-to-run noise): the `__init__` is only three `STORE_ATTR`s, and the interpreted `timeit` loop crosses the
-interpreter↔native boundary on every call, which caps any gain. Where compiling a
-hand-written `__init__` *does* pay off is when it does real interpreted work —
-[manual record](#manual-record) routes every
-field through `object.__setattr__` and drops from 222 to 78 ns once compiled, a
-speedup a frozen `dataclass` can't get. NamedTuple's `__new__`, by contrast, stays
-interpreted even when compiled and there's nothing for mypyc to lower at all without
-breaking the tuple contract.
-
-So, I've been right to reach for `NamedTuple` as a cheaper immutable type than `dataclass(frozen=True)`, but I was wrong to think that it was _perfectly_ efficient and compact like a C struct.
-
 ### `native slots`
 
 A plain slotted class with `Final` fields.
@@ -590,6 +538,152 @@ here is measured exactly like every other construct — module self-time ÷ K, w
 includes the ~7 µs the bare `class` statement costs regardless — so it is directly
 comparable to the figures above.)
 
+### Why three type-cost tiers?
+
+1. fastest: `native slots`, `record-type (C)`, `msgspec`, and `manual record`
+2. ~8× slower: `NamedTuple`, `record-type`
+3. ~20-30× slower: `dataclass`, `dataclass(frozen=True)`, `attrs`
+
+The single best predictor turned out to
+be how many methods each construct has to **generate at class-creation**: zero,
+one, or several. (Trace it yourself with
+[`codegen_probe.py`](https://github.com/JPHutchins/python-struct-profiling/blob/d8acfd5f63824b87b24e820e6f6859e0194da4c6/codegen_probe.py),
+which captures every `exec` / `eval` / `compile` a single definition triggers.)
+
+#### Tier 1 — nothing generated. 
+
+`native slots` and `manual record` are
+hand-written, so their methods compile *once* into the `.pyc` and the `class`
+statement only has to build the type. `msgspec` and `record-type (C)` generate no
+*Python* either. A C metaclass assembles the type directly.
+
+#### Tier 2 — one generated method.
+
+[`collections.namedtuple`](https://github.com/python/cpython/blob/v3.14.0/Lib/collections/__init__.py#L361)
+builds a `tuple` subclass — a descriptor per field and a single `eval`'d `__new__`:
+
+```python
+lambda _cls, a, b, c: _tuple_new(_cls, (a, b, c))
+```
+
+with [`typing.NamedTuple`](https://github.com/python/cpython/blob/v3.14.0/Lib/typing.py#L3027)
+adding [PEP 649](https://peps.python.org/pep-0649/) annotation handling on top.
+`record-type`'s [`@record`](https://github.com/brettcannon/record-type/blob/2023.1/records.py#L86)
+takes the other road — `inspect.signature` to read the fields, then one `exec`'d
+class whose only generated logic is the `__init__` (`__eq__` / `__hash__` /
+`__repr__` come from a `Record` base):
+
+```python
+class C(Record):
+	__slots__ = ('a', 'b', 'c')
+
+	def __init__(self, /, a, b, c) -> None:
+		object.__setattr__(self, 'a', a)
+		object.__setattr__(self, 'b', b)
+		object.__setattr__(self, 'c', c)
+```
+
+A metaclass-plus-factory and a decorator-plus-`inspect`: different machinery, the
+same one-method's-worth of work, the same tier.
+
+#### Tier 3 — several generated methods, plus field work and a rebuild.
+
+[`dataclass`](https://github.com/python/cpython/blob/v3.14.0/Lib/dataclasses.py#L934)
+turns the annotations into `Field` objects and generates `__init__`, `__repr__`,
+and `__eq__` in one shot (a factory that returns the three):
+
+```python
+def __create_fn__(
+	__dataclass_type_a__,
+	__dataclass_type_b__,
+	__dataclass_type_c__,
+	__dataclass_HAS_DEFAULT_FACTORY__,
+	__dataclass_builtins_object__,
+	__dataclass___init___return_type__,
+	__dataclasses_recursive_repr
+):
+	def __init__(
+		self,
+		a:__dataclass_type_a__,
+		b:__dataclass_type_b__,
+		c:__dataclass_type_c__
+	) -> __dataclass___init___return_type__:
+		self.a=a
+		self.b=b
+		self.c=c
+	@__dataclasses_recursive_repr()
+	def __repr__(self):
+		return f"{self.__class__.__qualname__}(a={self.a!r}, b={self.b!r}, c={self.c!r})"
+	def __eq__(self,other):
+		if self is other:
+			return True
+		if other.__class__ is self.__class__:
+			return self.a==other.a and self.b==other.b and self.c==other.c
+		return NotImplemented
+	return (__init__,__repr__,__eq__,)
+```
+
+`frozen=True` adds three more: `__setattr__`, `__delattr__`, `__hash__` — and
+`slots=True` [creates the class a second time](https://github.com/python/cpython/blob/v3.14.0/Lib/dataclasses.py#L1277),
+since slots can't be added in place.
+[`attrs`](https://github.com/python-attrs/attrs/blob/26.1.0/src/attr/_make.py#L796)
+is a more layered version of the same idea.
+
+### NamedTuple in mypyc
+
+I was really hoping that mypyc was going to compile NamedTuple to a native struct. [Compiling the module](#interpreted-vs-compiled) changes *almost nothing* about the `NamedTuple`, while it transforms `native slots`:
+
+| metric                | NamedTuple<br/>interpreted | NamedTuple<br/>mypyc | native slots<br/>interpreted | native slots<br/>mypyc |
+| --------------------- | :-----------------------: | :-----------------: | :------------------------: | :------------------: |
+| `isinstance(_, tuple)`| yes                       | yes                 | no                         | no                   |
+| bytes / instance      | 88                        | 88                  | 64                         | 72                   |
+| `__new__` (type) instructions            | 7 bytecodes               | 7 bytecodes         | C                          | C                    |
+| `__init__` (instance) instructions            | C                         | C                   | 9 bytecodes                | C                    |
+| instance (ns)        | 138                       | 142                 | 87.5                       | 75.7                 |
+
+The NamedTuple columns are identical: same footprint, same construct time. Its' `__new__` is still seven interpreted bytecodes inside the compiled extension module, building a tuple and handing it to `tuple.__new__`:
+
+```text
+1 RESUME                            0
+  LOAD_GLOBAL                       1 (_tuple_new + NULL)
+  LOAD_FAST_BORROW_LOAD_FAST_BORROW 1 (_cls, a)
+  LOAD_FAST_BORROW_LOAD_FAST_BORROW 35 (b, c)
+  BUILD_TUPLE                       3
+  CALL                              2
+  RETURN_VALUE
+```
+
+Contrast the native record. It has no `__new__` at all; its `__init__` writes
+the three fields straight into their slots with `STORE_ATTR` — no tuple, no
+length field, no boxed item array. (The `Final` annotations add *zero* bytecode;
+they're a pure type-checker hint, so this is byte-for-byte a plain slotted
+class.)
+
+```text
+11 RESUME                   0
+12 LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (a, self)
+   STORE_ATTR               0 (a)
+13 LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (b, self)
+   STORE_ATTR               1 (b)
+14 LOAD_FAST_BORROW_LOAD_FAST_BORROW 48 (c, self)
+   STORE_ATTR               2 (c)
+   LOAD_CONST               0 (None)
+   RETURN_VALUE
+```
+
+mypyc *does* lower this `__init__` to C — recall its 9 bytecodes became C-level in
+the compiled column. But for *this* record you barely see it in the construction
+numbers (87 → 76 ns, within run-to-run noise): the `__init__` is only three `STORE_ATTR`s, and the interpreted `timeit` loop crosses the
+interpreter↔native boundary on every call, which caps any gain. Where compiling a
+hand-written `__init__` *does* pay off is when it does real interpreted work —
+[manual record](#manual-record) routes every
+field through `object.__setattr__` and drops from 222 to 78 ns once compiled, a
+speedup a frozen `dataclass` can't get. NamedTuple's `__new__`, by contrast, stays
+interpreted even when compiled and there's nothing for mypyc to lower at all without
+breaking the tuple contract.
+
+So, I've been right to reach for `NamedTuple` as a cheaper immutable type than `dataclass(frozen=True)`, but I was wrong to think that it was _perfectly_ efficient and compact like a C struct.
+
 ### Further reading
 
 - **A first-class record type for Python.** Brett Cannon's
@@ -708,7 +802,9 @@ time excludes child imports, so the supporting library isn't double-counted:
   real class-statement form, import it, and read its self-time; the per-type
   figure is that self-time ÷ 200, the median of five fresh interpreters (this is
   what the committed `importtime_sweep.py` reports). Dividing by K folds a small
-  fixed per-module overhead into each figure.
+  fixed per-module overhead into each figure. What that per-type cost *consists*
+  of — the methods each construct generates at class-creation — is dissected in
+  [Why three type-cost tiers](#why-three-type-cost-tiers).
 - **Cold vs warm.** "Warm" imports with the `__pycache__/*.pyc` already written;
   "cold" deletes `__pycache__` first, so the source is recompiled to bytecode
   in-process. Their difference is the source→bytecode compile cost (tens of
@@ -778,8 +874,9 @@ Everything here is reproducible from the
 [`python-struct-profiling`](https://github.com/JPHutchins/python-struct-profiling)
 repository — the data in this post was produced at commit
 [`b2f2eb7`](https://github.com/JPHutchins/python-struct-profiling/tree/b2f2eb7da90762e51957189f130d10f22d2eb77a).
-Two committed harnesses produce every number, both on the same machine and both
-carrying the identical three-`int`-field shape:
+Two committed harnesses produce every number, and a third dissects the
+type-definition mechanism — all on the same machine, all carrying the identical
+three-`int`-field shape:
 
 - `bench.py` — memory (`tracemalloc`), bytecode (`dis`), and instantiation
   (`timeit`), run once against the interpreted module and once against the
@@ -788,6 +885,10 @@ carrying the identical three-`int`-field shape:
   of K real class-statement / decorator forms per construct, imports it under
   `python -X importtime` in a fresh interpreter, and divides the module self-time
   by K. The figures here are `--k 200 --runs 5`.
+- `codegen_probe.py` (added at [`d8acfd5`](https://github.com/JPHutchins/python-struct-profiling/tree/d8acfd5f63824b87b24e820e6f6859e0194da4c6)) — the mechanism behind the
+  [three type-cost tiers](#why-three-type-cost-tiers): it traces the `exec` /
+  `eval` / `compile` each construct runs at class-creation and counts how many
+  methods each one generates (zero, one, or several).
 
 ### Raw data
 
