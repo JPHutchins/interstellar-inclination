@@ -1,13 +1,13 @@
 ---
 title: "The Fastest Python Struct?"
 author: JP Hutchins
-date: 2026-06-20
+date: 2026-06-21
 tags: [types, python, CPython, struct, mypyc, "functional programming"]
 icon: /python.png
 preview: |
   An adventure in Python struct benchmarking: slotted class, NamedTuple, dataclass, attrs, msgspec, record-type, and a new C extension based on record-type and
   msgspec. Focus is on import-time, type-construction, memory, and instantiation cost,
-  NOT SERIALIZATION, including impact of mypyc
+  NOT DE/SERIALIZATION, including impact of mypyc
 ---
 
 import Plotly from "@components/Plotly";
@@ -237,6 +237,7 @@ roughly 25-55 µs here, scaling with how much source each class has. That's not 
 <Plotly
 	{...charts.coldWarmPerType}
 	height={400}
+	caption="Per-type definition cost: cold (recompile to bytecode), warm (cached bytecode), and mypyc-compiled."
 />
 
 Many of these benefit greatly from a warm start, which is the most common use of a Python program. Cold start is included because it's the first impression that a user gets: _"how fast to `--help`?"_
@@ -301,6 +302,7 @@ What can I say, since the benchmark suite was setup, I couldn't resist. The inst
 <Plotly
 	{...charts.instCost}
 	height={400}
+	caption="Per-instance construction time, interpreted vs mypyc-compiled."
 />
 
 <RatioTable
@@ -335,6 +337,7 @@ Immutability sometimes costs time or space and is never more efficient.
 <Plotly
 	{...charts.immMemory}
 	height={380}
+	caption="Memory: freezing never changes the footprint — frozen=True is a write-path flag, not a layout change."
 />
 
 <Plotly
@@ -346,68 +349,8 @@ Immutability sometimes costs time or space and is never more efficient.
 <Plotly
 	{...charts.immInstantiation}
 	height={380}
+	caption="Construction: freezing adds a write-path cost for dataclass and attrs (each field through object.__setattr__), and is essentially free for msgspec."
 />
-
-{/* ### Why frozen is slower to construct
-
-The instantiation penalty is visible in the generated `__init__`. A mutable
-slotted dataclass stores each field with a single `STORE_ATTR`; a *frozen* one
-can't use plain assignment (it raises on attribute set), so it routes every field
-through `object.__setattr__(...)` — a load, an attribute lookup, and a call per
-field. Flip between them:
-
-:::tabbed-code
-```text tab="mutable — 9 ops"
-  2           RESUME                   0
-
-  3           LOAD_FAST_BORROW_LOAD_FAST_BORROW 16 (a, self)
-              STORE_ATTR               0 (a)
-
-  4           LOAD_FAST_BORROW_LOAD_FAST_BORROW 32 (b, self)
-              STORE_ATTR               1 (b)
-
-  5           LOAD_FAST_BORROW_LOAD_FAST_BORROW 48 (c, self)
-              STORE_ATTR               2 (c)
-              LOAD_CONST               0 (None)
-              RETURN_VALUE
-```
-
-```text tab="frozen — 25 ops"
-  --           COPY_FREE_VARS           1
-
-   2           RESUME                   0
-
-   3           LOAD_DEREF               4 (__dataclass_builtins_object__)
-               LOAD_ATTR                1 (__setattr__ + NULL|self)
-               LOAD_FAST_BORROW         0 (self)
-               LOAD_CONST               0 ('a')
-               LOAD_FAST_BORROW         1 (a)
-               CALL                     3
-               POP_TOP
-
-   4           LOAD_DEREF               4 (__dataclass_builtins_object__)
-               LOAD_ATTR                1 (__setattr__ + NULL|self)
-               LOAD_FAST_BORROW         0 (self)
-               LOAD_CONST               1 ('b')
-               LOAD_FAST_BORROW         2 (b)
-               CALL                     3
-               POP_TOP
-
-   5           LOAD_DEREF               4 (__dataclass_builtins_object__)
-               LOAD_ATTR                1 (__setattr__ + NULL|self)
-               LOAD_FAST_BORROW         0 (self)
-               LOAD_CONST               2 ('c')
-               LOAD_FAST_BORROW         3 (c)
-               CALL                     3
-               POP_TOP
-               LOAD_CONST               3 (None)
-               RETURN_VALUE
-```
-:::
-
-Nine instructions become twenty-five. `msgspec` and `NamedTuple` sidestep this
-entirely — neither has an interpreted `__init__` to run; construction bottoms
-out in C. */}
 
 ### `native slots`
 
@@ -425,16 +368,18 @@ class NativeFinal:
 		self.c: Final = c
 ```
 
-The `Final` is for the static checker, meaning that it has zero runtime cost. `mypy` rejects `o.a = 99`, but the assignment succeeds anyway, on the
+The `Final` is for the static checker, meaning that it has zero runtime cost.[^9] `mypy` rejects `o.a = 99`, but the assignment succeeds anyway, on the
 interpreted class *and* the compiled `.so`. So this is the closest thing to a
 native record mypyc can produce — a compact slotted object (64 bytes; 72
 compiled) whose `__init__` it lowers to C-level slot stores, but it is *not*
 actually immutable at runtime (zero cost abstraction).
 
+[^9]: ["typing.Final"](https://docs.python.org/3/library/typing.html#typing.Final). docs.python.org. Retrieved 2026-06-21. "There is no runtime checking of these properties." (See also [PEP 591](https://peps.python.org/pep-0591/).)
+
 
 ### `manual record`
 
-The `Final`+slots control is precisely because it
+`native slots` is cheap precisely because it
 does *less*. It has no `__eq__`, `__hash__`, or `__repr__`, and — as we saw — it
 isn't even immutable. Every other record here gives you all of that. So here is
 [Brett Cannon's record-type pattern](https://github.com/brettcannon/record-type): a complete, genuinely-immutable hand-written record with
@@ -504,7 +449,7 @@ near-zero import, but either slow to construct (222 ns) or — once mypyc lowers
 `object.__setattr__` init — fast (78 ns) yet *larger* (96 bytes). `msgspec.Struct`
 shows C clears that ceiling: compact (64 bytes), immutable, ~62 ns construction,
 ~10 µs/type. Its one catch is the module cost. `import msgspec` runs
-**~19 ms**, because it's a serialization library and you can't get just the struct without importing the whole kitchen sink.
+**~19 ms**, because it's a serialization library and you can't get just the struct without importing the whole kitchen sink.[^8]
 
 Can you get msgspec's record qualities *without* its import tax? A **research
 prototype** (_read: LLM slop_) on a [branch of Brett Cannon's `record-type`](https://github.com/JPHutchins/record-type/pull/1)
@@ -639,7 +584,7 @@ I was really hoping that mypyc was going to compile NamedTuple to a native struc
 | `__init__` (instance) instructions            | C                         | C                   | 9 bytecodes                | C                    |
 | instance (ns)        | 138                       | 142                 | 87.5                       | 75.7                 |
 
-The NamedTuple columns are identical: same footprint, same construct time. Its' `__new__` is still seven interpreted bytecodes inside the compiled extension module, building a tuple and handing it to `tuple.__new__`:
+The NamedTuple columns are identical: same footprint, same construct time. Its `__new__` is still seven interpreted bytecodes inside the compiled extension module, building a tuple and handing it to `tuple.__new__`:
 
 ```text
 1 RESUME                            0
@@ -814,7 +759,7 @@ time excludes child imports, so the supporting library isn't double-counted:
 - **mypyc axis.** The generated module is compiled with `mypyc` and the resulting
   `.so` imported under the same harness. A compiled extension has no Python
   source to recompile, so there's no cold/warm gap — yet its per-type creation
-  cost is barely lower than interpreted, because type creation is dominated by
+  cost is barely lower than interpreted, likely because type creation is dominated by
   CPython's `PyType_Ready`, which runs either way.
 
 ### The crossover model
