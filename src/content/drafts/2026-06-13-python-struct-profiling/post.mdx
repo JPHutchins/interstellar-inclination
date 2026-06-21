@@ -21,7 +21,7 @@ benchmarks and writing these Plotly charts? I do not know.[^1]
 [^1]: If you have any ideas, please LMK so I can explain it to my family.
 
 But! I do know _what_ I care about (for now) - and today (and some of the past weekend, and perhaps some of the next one),
-it's definitely the _cost of defining (ideally immutable) record types (AKA structs) in Python_.
+it's definitely the **_cost of defining (ideally immutable) record types (AKA structs) in Python_**.
 
 So let's get this out of the way: this write up is about benchmarking "Python type speed", it is NOT about benchmarking
 - serialization
@@ -30,9 +30,11 @@ So let's get this out of the way: this write up is about benchmarking "Python ty
 - validation
 - memory
 
-Right, so that's what Python programmers often care about, because they are probably working on long running programs, like servers or pipelines, where the cost of defining a __type__ is paid upfront, one time, whereas the cost of allocation, instantiation, validation, and serialization is paid repeatedly. So yeah, if that's what you care about, this post is not for you.
+Right, so that's what Python programmers often care about, because they are probably working on long running programs, like apps, servers or pipelines, where the cost of defining a __type__ is paid upfront, one time, whereas the cost of allocation, instantiation, validation, and serialization is paid repeatedly. So yeah, if that's what you care about, this post is not for you.
 
-If you're convinced, then jump straight to the [analysis](#structs-under-test-suts), otherwise keep reading for my motivation and context on this subject.
+> But I did include [instance cost](#instance-cost) benchmarks if you're curious. 😻
+
+If you already know you care about type definition speed, then jump straight to the [analysis](#structs-under-test-suts), otherwise keep reading for my motivation and context on this subject.
 
 ## "how fast to `--help`"
 
@@ -423,16 +425,12 @@ class NativeFinal:
 		self.c: Final = c
 ```
 
-The `Final` does less than it looks. It's a static-checker hint, erased at
-runtime — `mypy` rejects `o.a = 99`, but the assignment succeeds anyway, on the
+The `Final` is for the static checker, meaning that it has zero runtime cost. `mypy` rejects `o.a = 99`, but the assignment succeeds anyway, on the
 interpreted class *and* the compiled `.so`. So this is the closest thing to a
 native record mypyc can produce — a compact slotted object (64 bytes; 72
-compiled) whose `__init__` it lowers to C-level slot stores — but it is *not*
-actually immutable.
+compiled) whose `__init__` it lowers to C-level slot stores, but it is *not*
+actually immutable at runtime (zero cost abstraction).
 
-> [!TIP] Trust Your Compiler
->
-> This doesn't matter to me, and shouldn't matter to you either, because type systems and compilers are good, actually. [_Stop fearing the muons_ 🤞](https://en.wikipedia.org/wiki/Single-event_upset).
 
 ### `manual record`
 
