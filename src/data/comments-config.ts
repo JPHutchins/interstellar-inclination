@@ -18,8 +18,8 @@ export const commentsConfig: CommentsConfig = {
 	webmentionDomain: "www.crumpledpaper.tech",
 	fediverseHandle: "@crumpledpaper.tech@web.brid.gy",
 	fediverseProfileUrl: "https://fed.brid.gy/web/crumpledpaper.tech",
-	blueskyHandle: "crumpledpaper.tech.web.brid.gy",
-	blueskyProfileUrl: "https://bsky.app/profile/crumpledpaper.tech.web.brid.gy",
+	blueskyHandle: "crumpledpaper.tech",
+	blueskyProfileUrl: "https://bsky.app/profile/crumpledpaper.tech",
 	giscus: {
 		repo: "JPHutchins/interstellar-inclination",
 		repoId: "R_kgDONsP9iA",
