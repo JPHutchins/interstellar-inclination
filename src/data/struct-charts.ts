@@ -252,6 +252,42 @@ const ROWS: Row[] = [
 	{ name: byKey.msgspec.label, v: byKey.msgspec.frozen },
 ];
 
+// --- relative-comparison tables (<RatioTable />) -------------------------
+// The same ROWS (9 SUTs, table order, dataclass split) re-expressed as absolute
+// numbers per metric; <RatioTable> normalizes each column against the `unit`
+// row. Add a metric by giving it columns + a picker — nothing here is hardcoded.
+const stripBr = (s: string) => s.replace(/<br\s*\/?>/g, " ");
+const ratioTable = (
+	unit: string,
+	columns: { key: string; label: string }[],
+	pick: (v: Variant) => Record<string, number | null>,
+) => ({
+	unit,
+	sortKey: columns[0].key,
+	rowHeader: "implementation",
+	columns,
+	rows: ROWS.map((r) => ({ label: stripBr(r.name), cells: pick(r.v) })),
+});
+
+export const typeCostTable = ratioTable(
+	"NamedTuple",
+	[
+		{ key: "warm", label: "warm" },
+		{ key: "cold", label: "cold" },
+		{ key: "mypyc", label: "mypyc" },
+	],
+	(v) => ({ warm: v.importUs.warm, cold: v.importUs.cold, mypyc: v.importUs.mypyc }),
+);
+
+export const instCostTable = ratioTable(
+	"NamedTuple",
+	[
+		{ key: "interp", label: "interpreted" },
+		{ key: "mypyc", label: "mypyc" },
+	],
+	(v) => ({ interp: v.instNs.interp, mypyc: v.instNs.mypyc }),
+);
+
 // NamedTuple↔msgspec crossover, derived so the annotation can't drift from the
 // data: N where dep_a + N*per_a == dep_b + N*per_b (dep in ms, per-type in us).
 const crossoverTypes = (a: Construct, b: Construct, cache: "warm" | "cold"): number =>
@@ -569,7 +605,7 @@ const startupTraces = () =>
 				mode: "lines",
 				line: { color: m.color, width: 1.6, dash: "dot" },
 				fill: "tonexty",
-				fillcolor: hexToRgba(m.color, 0.1),
+				fillcolor: hexToRgba(m.color, 0.07),
 				legendgroup: name,
 				hovertemplate: `${name}<br>%{x:.0f} types · cold %{y:.3r} ms<extra></extra>`,
 			},
