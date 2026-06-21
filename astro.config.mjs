@@ -9,6 +9,7 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import remarkDirective from "remark-directive";
 import rehypeAside from "./src/utils/rehype-aside.ts";
+import rehypeTocWrap from "./src/utils/rehype-toc-wrap.ts";
 import sitemap from "@astrojs/sitemap";
 import { mermaid } from "./src/plugins/mermaid";
 import { remarkTabbedCode } from "./src/plugins/remark-tabbed-code.ts";
@@ -56,6 +57,7 @@ export default defineConfig({
 					},
 				},
 			],
+			rehypeTocWrap,
 		],
 	},
 });

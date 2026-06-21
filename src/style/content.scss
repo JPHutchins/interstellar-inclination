@@ -312,3 +312,29 @@
 		color: var(--text-color);
 	}
 }
+
+.toc {
+	border-left: 2px solid #888;
+	font-size: 0.9em;
+	padding-top: 0.5em;
+	padding-left: 1em;
+	padding-bottom: 0.5em;
+	background-color: var(--background-color-aside);
+
+	h2 {
+		margin-top: 0;
+	}
+
+	ul {
+		margin-bottom: 0;
+	}
+
+	& {
+		@media (max-width: 1024px) {
+			margin-left: -0.75rem;
+			margin-right: -0.75rem;
+			padding-left: 0.75rem;
+			padding-right: 0.75rem;
+		}
+	}
+}
