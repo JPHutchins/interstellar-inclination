@@ -9,7 +9,10 @@ const posts = published(await getPosts());
 const allTags = [...new Set(posts.flatMap((post) => post.tags))].sort((a, b) => a.localeCompare(b));
 ---
 
-<Blog title="Crumpled Paper">
+<Blog
+	title="Crumpled Paper"
+	description="The personal blog of JP Hutchins — technical writing on firmware, Python, developer experience, functional programming, and type systems."
+>
 	<div class="post-header container">
 		<h1 class="post-title">Posts</h1>
 	</div>
