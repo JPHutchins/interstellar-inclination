@@ -683,7 +683,7 @@ export const startup: Spec = {
 		],
 		xaxis: {
 			type: "log",
-			title: { text: "number of types defined (log₂)" },
+			title: { text: "number of types defined" },
 			tickvals: X_TICKS,
 			ticktext: X_TICKS.map((v) => v.toLocaleString()),
 			range: [0, 3.74],
