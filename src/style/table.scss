@@ -3,11 +3,11 @@
 	overflow-x: auto;
 	margin-bottom: 1em;
 
-	// Size to content so a wide table scrolls inside this wrapper instead of
-	// squishing the page; min-width keeps a narrow table full-bleed as before.
+	// Text wraps to fit the column first; only when the table's min-content is
+	// genuinely wider than the page (unbreakable tokens, too many columns) does
+	// it overflow and scroll inside this wrapper instead of squishing the page.
 	> table {
-		width: max-content;
-		min-width: 100%;
+		width: 100%;
 		margin-bottom: 0;
 	}
 }
