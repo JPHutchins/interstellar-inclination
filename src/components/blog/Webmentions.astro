@@ -1,5 +1,11 @@
 ---
-import { responsesFor, contentHtml, contentText } from "src/utils/webmentions";
+import {
+	responsesFor,
+	contentHtml,
+	contentText,
+	authorName,
+	responseLink,
+} from "src/utils/webmentions";
 import { sanitizeWebmentionHtml } from "src/utils/sanitize-webmention";
 import { commentsConfig } from "@data/comments-config";
 
@@ -40,18 +46,18 @@ const hostOf = (url?: string): string => {
 			<ul class="facepile" aria-label="Likes and reposts">
 				{reactions.map((r) => {
 					const verb = r["wm-property"] === "repost-of" ? "reposted" : "liked";
-					const label = `${r.author?.name ?? "Someone"} ${verb} this`;
+					const label = `${authorName(r)} ${verb} this`;
 					return (
 						<li>
 							<a
-								href={r.author?.url ?? r["wm-source"]}
+								href={responseLink(r)}
 								rel="nofollow ugc noopener"
 								target="_blank"
 								aria-label={label}
 								title={label}
 							>
 								<img
-									src={r.author?.photo ?? fallbackAvatar}
+									src={r.author?.photo || fallbackAvatar}
 									alt=""
 									loading="lazy"
 									width="40"
@@ -75,19 +81,19 @@ const hostOf = (url?: string): string => {
 						<li class="webmention">
 							<a
 								class="webmention-author"
-								href={reply.author?.url ?? reply["wm-source"]}
+								href={responseLink(reply)}
 								rel="nofollow ugc noopener"
 								target="_blank"
 							>
 								<img
-									src={reply.author?.photo ?? fallbackAvatar}
+									src={reply.author?.photo || fallbackAvatar}
 									alt=""
 									loading="lazy"
 									width="40"
 									height="40"
 								/>
 								<span class="webmention-author-name">
-									{reply.author?.name ?? "Someone"}
+									{authorName(reply)}
 								</span>
 							</a>
 							{html ? (
@@ -98,14 +104,14 @@ const hostOf = (url?: string): string => {
 							) : (
 								<p class="webmention-body">{text ?? ""}</p>
 							)}
-							{reply["wm-source"] ? (
+							{responseLink(reply) ? (
 								<a
 									class="webmention-source"
-									href={reply["wm-source"]}
+									href={responseLink(reply)}
 									rel="nofollow ugc noopener"
 									target="_blank"
 								>
-									via {hostOf(reply["wm-source"])}
+									via {hostOf(responseLink(reply))}
 								</a>
 							) : null}
 						</li>

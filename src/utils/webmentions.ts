@@ -87,3 +87,20 @@ export const contentHtml = (entry: WebmentionEntry): string | undefined =>
 
 export const contentText = (entry: WebmentionEntry): string | undefined =>
 	typeof entry.content === "string" ? undefined : entry.content?.text;
+
+const networkOf = (entry: WebmentionEntry): string | null => {
+	const haystack = `${entry["wm-source"] ?? ""} ${entry.url ?? ""}`;
+	if (/bsky|bluesky/i.test(haystack)) return "Bluesky";
+	if (/brid\.gy/i.test(haystack)) return "the fediverse";
+	return null;
+};
+
+export const authorName = (entry: WebmentionEntry): string => {
+	const name = entry.author?.name?.trim();
+	if (name) return name;
+	const where = networkOf(entry);
+	return where ? `Someone on ${where}` : "Someone";
+};
+
+export const responseLink = (entry: WebmentionEntry): string | undefined =>
+	entry.author?.url?.trim() || entry.url || entry["wm-source"];
