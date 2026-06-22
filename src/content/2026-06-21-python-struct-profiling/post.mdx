@@ -273,7 +273,7 @@ $$
 t_{\text{startup}} = m_{\text{module}} + N \cdot c_{\text{type}}
 $$
 
-The interactive chart below shows the startup time on the Y axis and the number of types defined on the X axis. The Y axis can be toggled between linear and log10, 0ms-1,000ms, and the X axis is log2 from 1 to 4,096 types. For each implementation, the solid line is the warm time, and the dotted line is the cold time. Click on a name in the legend to toggle, double click to isolate, and double click on a disabled name to reset.
+The interactive chart below shows the startup time on the Y axis and the number of types defined on the X axis. The scales can be toggled together between log (Y log10, X log2 from 1 to 4,096 types) and linear (Y clipped to 0ms–1,000ms, X from 0 to 4,096 types). For each implementation, the solid line is the warm time, and the dotted line is the cold time. Click on a name in the legend to toggle, double click to isolate, and double click on a disabled name to reset.
 
 <Plotly
 	{...charts.startup}

@@ -618,12 +618,18 @@ const Y_TICKS = [0.01, 0.1, 1, 10, 100, 1000];
 export const startup: Spec = {
 	data: startupTraces(),
 	layout: {
-		legend: { x: 1.02, y: 1, xanchor: "left", yanchor: "top", bgcolor: "rgba(0,0,0,0)" },
-		margin: { t: 64, r: 150, b: 60, l: 66 },
-		// Let the reader flip the Y axis: log (full range, the informative default)
-		// or linear 0–1000 ms (makes the gross divergence obvious, clips the rest).
-		// X stays log₂ and the crossover band/annotation use paper coords, so only
-		// the Y scale changes.
+		legend: {
+			orientation: "h",
+			x: 0,
+			xanchor: "left",
+			y: -0.22,
+			yanchor: "top",
+			bgcolor: "rgba(0,0,0,0)",
+		},
+		margin: { t: 64, r: 24, b: 170, l: 66 },
+		// Let the reader flip both scales together: log (full range, the
+		// informative default) or linear (Y clipped to 0–1000 ms to make the gross
+		// divergence obvious; X linear 0–4096 over the same data).
 		updatemenus: [
 			{
 				type: "buttons",
@@ -639,7 +645,7 @@ export const startup: Spec = {
 				font: { size: 11 },
 				buttons: [
 					{
-						label: "log Y",
+						label: "log",
 						method: "relayout",
 						args: [
 							{
@@ -647,11 +653,15 @@ export const startup: Spec = {
 								"yaxis.range": [Math.log10(0.004), Math.log10(2600)],
 								"yaxis.tickvals": Y_TICKS,
 								"yaxis.ticktext": Y_TICKS.map((v) => String(v)),
+								"xaxis.type": "log",
+								"xaxis.range": [0, 3.74],
+								"xaxis.tickvals": X_TICKS,
+								"xaxis.ticktext": X_TICKS.map((v) => v.toLocaleString()),
 							},
 						],
 					},
 					{
-						label: "linear Y (0–1000)",
+						label: "linear (0–1000 ms)",
 						method: "relayout",
 						args: [
 							{
@@ -659,6 +669,12 @@ export const startup: Spec = {
 								"yaxis.range": [0, 1000],
 								"yaxis.tickvals": [0, 200, 400, 600, 800, 1000],
 								"yaxis.ticktext": ["0", "200", "400", "600", "800", "1000"],
+								"xaxis.type": "linear",
+								"xaxis.range": [0, 4096],
+								"xaxis.tickvals": [0, 1024, 2048, 3072, 4096],
+								"xaxis.ticktext": [0, 1024, 2048, 3072, 4096].map((v) =>
+									v.toLocaleString(),
+								),
 							},
 						],
 					},
