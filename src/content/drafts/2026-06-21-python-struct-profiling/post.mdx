@@ -15,7 +15,9 @@ import StructData from "@components/StructData";
 import RatioTable from "@components/RatioTable";
 import { charts, typeCostTable, instCostTable } from "@data/struct-charts";
 
-Why do I care? Why do I get obsessed enough to coerce Claude into running these
+Python is _fast enough_. Python programmers tend to understand the [Python Cost Model](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/readings/python-cost-model/), Python's strengths and weaknesses, libraries that give compiled performance, and when to use a compiled language from the start.
+
+So why do I care? Why do I get obsessed enough to coerce Claude into running these
 benchmarks and writing these Plotly charts? I do not know.[^1]
 
 [^1]: If you have any ideas, please LMK so I can explain it to my family.
@@ -23,7 +25,7 @@ benchmarks and writing these Plotly charts? I do not know.[^1]
 But! I do know _what_ I care about (for now) - and today (and some of the past weekend, and perhaps some of the next one),
 it's definitely the **_cost of defining (ideally immutable) record types (AKA structs) in Python_**.
 
-So let's get this out of the way: this write up is about benchmarking "Python type speed", it is NOT about benchmarking
+So let's get this out of the way: this write up is about benchmarking "Python type speed" (informally: compile-time), it is NOT about benchmarking
 - serialization
 - instantiation
 - attribute access
