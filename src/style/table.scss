@@ -1,3 +1,17 @@
+.table-wrapper {
+	max-width: 100%;
+	overflow-x: auto;
+	margin-bottom: 1em;
+
+	// Size to content so a wide table scrolls inside this wrapper instead of
+	// squishing the page; min-width keeps a narrow table full-bleed as before.
+	> table {
+		width: max-content;
+		min-width: 100%;
+		margin-bottom: 0;
+	}
+}
+
 table {
 	width: 100%;
 	background-color: var(--background-color);

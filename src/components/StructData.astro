@@ -30,63 +30,90 @@ const bc = (x: number | "C") => (x === "C" ? "C" : String(x));
 		“—” means the construct is off the compiled axis (attrs, msgspec, and both record-types are
 		defined outside the compiled module; <code>record-type (C)</code> is already a C extension).
 	</p>
-	<table>
-		<thead>
-			<tr><th>construct</th><th>variant</th><th>warm</th><th>cold</th><th>mypyc</th></tr>
-		</thead>
-		<tbody>
-			{rows.map((r) => (
-				<tr>
-					<td>{r.construct}</td>
-					<td>{r.variant}</td>
-					<td>{num(r.v.importUs.warm)}</td>
-					<td>{num(r.v.importUs.cold)}</td>
-					<td>{num(r.v.importUs.mypyc)}</td>
-				</tr>
-			))}
-		</tbody>
-	</table>
+	<div
+		class="table-wrapper"
+		role="region"
+		tabindex="0"
+		aria-label="Table, scroll horizontally to see more"
+	>
+		<table>
+			<thead>
+				<tr><th>construct</th><th>variant</th><th>warm</th><th>cold</th><th>mypyc</th></tr>
+			</thead>
+			<tbody>
+				{
+					rows.map((r) => (
+						<tr>
+							<td>{r.construct}</td>
+							<td>{r.variant}</td>
+							<td>{num(r.v.importUs.warm)}</td>
+							<td>{num(r.v.importUs.cold)}</td>
+							<td>{num(r.v.importUs.mypyc)}</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
 
 	<p class="struct-data__cap">
 		<strong>Table 2 — One-time dependency import</strong>, milliseconds cumulative in a fresh
 		interpreter. Paid once per process regardless of how many types you define. The native
 		record imports no library.
 	</p>
-	<table>
-		<thead>
-			<tr><th>library</th><th>warm</th><th>cold</th></tr>
-		</thead>
-		<tbody>
-			{orderedConstructs.map((c) => (
-				<tr>
-					<td>{strip(c.depLabel)}</td>
-					<td>{num(c.depMs.warm)}</td>
-					<td>{num(c.depMs.cold)}</td>
-				</tr>
-			))}
-		</tbody>
-	</table>
+	<div
+		class="table-wrapper"
+		role="region"
+		tabindex="0"
+		aria-label="Table, scroll horizontally to see more"
+	>
+		<table>
+			<thead>
+				<tr><th>library</th><th>warm</th><th>cold</th></tr>
+			</thead>
+			<tbody>
+				{
+					orderedConstructs.map((c) => (
+						<tr>
+							<td>{strip(c.depLabel)}</td>
+							<td>{num(c.depMs.warm)}</td>
+							<td>{num(c.depMs.cold)}</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
 
 	<p class="struct-data__cap">
 		<strong>Table 3 — Per-instance memory</strong>, bytes (tracemalloc, GC header included).
 		Freezing never changes the footprint; mypyc adds one 8-byte vtable word to the native
 		classes it compiles.
 	</p>
-	<table>
-		<thead>
-			<tr><th>construct</th><th>variant</th><th>interpreted</th><th>mypyc</th></tr>
-		</thead>
-		<tbody>
-			{rows.map((r) => (
-				<tr>
-					<td>{r.construct}</td>
-					<td>{r.variant}</td>
-					<td>{int(r.v.memBytes.interp)}</td>
-					<td>{int(r.v.memBytes.mypyc)}</td>
-				</tr>
-			))}
-		</tbody>
-	</table>
+	<div
+		class="table-wrapper"
+		role="region"
+		tabindex="0"
+		aria-label="Table, scroll horizontally to see more"
+	>
+		<table>
+			<thead>
+				<tr><th>construct</th><th>variant</th><th>interpreted</th><th>mypyc</th></tr>
+			</thead>
+			<tbody>
+				{
+					rows.map((r) => (
+						<tr>
+							<td>{r.construct}</td>
+							<td>{r.variant}</td>
+							<td>{int(r.v.memBytes.interp)}</td>
+							<td>{int(r.v.memBytes.mypyc)}</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
 
 	<p class="struct-data__cap">
 		<strong>Table 4 — Instantiation</strong>, nanoseconds (min of 7 timeit repeats of 1e6
@@ -95,21 +122,30 @@ const bc = (x: number | "C") => (x === "C" ? "C" : String(x));
 		boundary (e.g. mutable dataclass 87.5→109.5). Treat these as ±10%; the construct-to-construct
 		shape is the robust signal, not small interpreted-vs-mypyc deltas.
 	</p>
-	<table>
-		<thead>
-			<tr><th>construct</th><th>variant</th><th>interpreted</th><th>mypyc</th></tr>
-		</thead>
-		<tbody>
-			{rows.map((r) => (
-				<tr>
-					<td>{r.construct}</td>
-					<td>{r.variant}</td>
-					<td>{num(r.v.instNs.interp)}</td>
-					<td>{num(r.v.instNs.mypyc)}</td>
-				</tr>
-			))}
-		</tbody>
-	</table>
+	<div
+		class="table-wrapper"
+		role="region"
+		tabindex="0"
+		aria-label="Table, scroll horizontally to see more"
+	>
+		<table>
+			<thead>
+				<tr><th>construct</th><th>variant</th><th>interpreted</th><th>mypyc</th></tr>
+			</thead>
+			<tbody>
+				{
+					rows.map((r) => (
+						<tr>
+							<td>{r.construct}</td>
+							<td>{r.variant}</td>
+							<td>{num(r.v.instNs.interp)}</td>
+							<td>{num(r.v.instNs.mypyc)}</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
 
 	<p class="struct-data__cap">
 		<strong>Table 5 — Construction bytecode</strong>, instruction counts from <code>dis</code>.
@@ -118,26 +154,41 @@ const bc = (x: number | "C") => (x === "C" ? "C" : String(x));
 		these counts are unchanged inside the compiled module except the native
 		<code>__init__</code>, which mypyc lowers to C.
 	</p>
-	<table>
-		<thead>
-			<tr><th>construct</th><th><code>__new__</code></th><th><code>__init__</code> (mutable)</th><th><code>__init__</code> (frozen)</th></tr>
-		</thead>
-		<tbody>
-			{orderedConstructs.map((c) => (
-				<tr>
-					<td>{strip(c.tableLabel)}</td>
-					<td>{bc(c.newBytecode)}</td>
-					<td>{c.mutable ? bc(c.mutable.initBytecode) : "—"}</td>
-					<td>{bc(c.frozen.initBytecode)}</td>
-				</tr>
-			))}
-		</tbody>
-	</table>
+	<div
+		class="table-wrapper"
+		role="region"
+		tabindex="0"
+		aria-label="Table, scroll horizontally to see more"
+	>
+		<table>
+			<thead>
+				<tr
+					><th>construct</th><th><code>__new__</code></th><th
+						><code>__init__</code> (mutable)</th
+					><th><code>__init__</code> (frozen)</th></tr
+				>
+			</thead>
+			<tbody>
+				{
+					orderedConstructs.map((c) => (
+						<tr>
+							<td>{strip(c.tableLabel)}</td>
+							<td>{bc(c.newBytecode)}</td>
+							<td>{c.mutable ? bc(c.mutable.initBytecode) : "—"}</td>
+							<td>{bc(c.frozen.initBytecode)}</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
 
 	<p class="struct-data__cap">
-		Derived: the NamedTuple ↔ msgspec startup crossover sits at <strong>{crossover.warm.toLocaleString()}</strong>
-		types (warm) and <strong>{crossover.cold.toLocaleString()}</strong> types (cold), computed
-		from Tables 1 and 2.
+		Derived: the NamedTuple ↔ msgspec startup crossover sits at <strong
+			>{crossover.warm.toLocaleString()}</strong
+		>
+		types (warm) and <strong>{crossover.cold.toLocaleString()}</strong> types (cold), computed from
+		Tables 1 and 2.
 	</p>
 </div>
 
@@ -146,10 +197,14 @@ const bc = (x: number | "C") => (x === "C" ? "C" : String(x));
 		margin: 2rem 0;
 		font-size: 0.9rem;
 	}
-	.struct-data table {
-		width: 100%;
-		border-collapse: collapse;
+	.struct-data .table-wrapper {
 		margin: 0.5rem 0 1.5rem;
+	}
+	.struct-data table {
+		width: max-content;
+		min-width: 100%;
+		border-collapse: collapse;
+		margin: 0;
 	}
 	.struct-data th,
 	.struct-data td {

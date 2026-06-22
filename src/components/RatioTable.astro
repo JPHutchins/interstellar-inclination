@@ -82,53 +82,64 @@ const bgStyle = (r: number | null): string => {
 };
 ---
 
-<table class="ratio-table" id={id} data-sortcol={String(initialCol)}>
-	<thead>
-		<tr>
-			<th scope="col">{rowHeader}</th>
-			{
-				columns.map((c) => (
-					<th scope="col" aria-sort={c.key === initialKey ? "ascending" : "none"}>
-						<button type="button" class="ratio-table__sort" aria-label={`Sort by ${c.label}`}>
-							{c.label}
-							<span class="ratio-table__arrow" aria-hidden="true" />
-						</button>
-					</th>
-				))
-			}
-		</tr>
-	</thead>
-	<tbody>
-		{
-			sorted.map((row) => {
-				const isBase = row.label === unit;
-				return (
-					<tr class={isBase ? "ratio-table__unit" : undefined}>
-						<td>
+<div
+	class="table-wrapper"
+	role="region"
+	tabindex="0"
+	aria-label="Table, scroll horizontally to see more"
+>
+	<table class="ratio-table" id={id} data-sortcol={String(initialCol)}>
+		<thead>
+			<tr>
+				<th scope="col">{rowHeader}</th>
+				{
+					columns.map((c) => (
+						<th scope="col" aria-sort={c.key === initialKey ? "ascending" : "none"}>
 							<button
 								type="button"
-								class="ratio-table__pick"
-								aria-pressed={isBase ? "true" : "false"}
-								aria-label={`Use ${row.label} as the baseline`}
+								class="ratio-table__sort"
+								aria-label={`Sort by ${c.label}`}
 							>
-								{row.label}
+								{c.label}
+								<span class="ratio-table__arrow" aria-hidden="true" />
 							</button>
-						</td>
-						{columns.map((c) => {
-							const a = row.cells[c.key];
-							const r = ratioOf(row, c.key);
-							return (
-								<td data-abs={a == null ? "" : String(a)} style={bgStyle(r)}>
-									{fmt(r)}
-								</td>
-							);
-						})}
-					</tr>
-				);
-			})
-		}
-	</tbody>
-</table>
+						</th>
+					))
+				}
+			</tr>
+		</thead>
+		<tbody>
+			{
+				sorted.map((row) => {
+					const isBase = row.label === unit;
+					return (
+						<tr class={isBase ? "ratio-table__unit" : undefined}>
+							<td>
+								<button
+									type="button"
+									class="ratio-table__pick"
+									aria-pressed={isBase ? "true" : "false"}
+									aria-label={`Use ${row.label} as the baseline`}
+								>
+									{row.label}
+								</button>
+							</td>
+							{columns.map((c) => {
+								const a = row.cells[c.key];
+								const r = ratioOf(row, c.key);
+								return (
+									<td data-abs={a == null ? "" : String(a)} style={bgStyle(r)}>
+										{fmt(r)}
+									</td>
+								);
+							})}
+						</tr>
+					);
+				})
+			}
+		</tbody>
+	</table>
+</div>
 {caption && <p class="ratio-table__cap" set:html={caption} />}
 
 <style>
