@@ -15,6 +15,8 @@ I've been burning quite a few tokens while LLMs are still basically "free" ([see
 
 You can see this site's [source](https://github.com/JPHutchins/interstellar-inclination) to see how the implementation went. I suppose it's not tested until this post goes live and I see it federated.
 
+Update: it's working!
+
 > [!WARNING] LLM Disclosure
 >
 > The following citations were assembled from the same `claude-opus-4-8` context that provided the webmentions + giscus implementation for this blog. The implementation is the result of my feeding in a subset of those articles and iterating until I approved the design and eventually the implementation itself.
