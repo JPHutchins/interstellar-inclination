@@ -2,9 +2,9 @@ name: Refresh webmentions
 
 on:
   schedule:
-    # webmention.io / Bridgy Fed delivery is not instant, so polling faster than
-    # ~15 min is wasteful. 30 min is a good default; bump down if you want.
-    - cron: "*/30 * * * *"
+    # Public repo → Actions are free and a run is ~10s, so poll often. GitHub
+    # schedules are best-effort (5-min crons can be delayed/skipped under load).
+    - cron: "*/5 * * * *"
   workflow_dispatch: {}
 
 # Least privilege: push one data file (contents) and dispatch the deploy (actions).

@@ -19,7 +19,7 @@ No server, no database. The site stays static and portable. Everything below is 
 ```
  reader on Mastodon/Bluesky ──reply──► Bridgy Fed ──webmention──► webmention.io (stores)
                                                                          │
-   .github/workflows/webmentions.yaml (cron, every 30 min)              │ JF2 API
+   .github/workflows/webmentions.yaml (cron, every ~5 min)              │ JF2 API
      └─ .github/scripts/update-webmentions.mjs ──fetch since_id────────►┘
           └─ writes src/data/webmentions.json ──commit+push──► deploy rebuild
                                                                          │
