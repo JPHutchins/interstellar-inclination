@@ -81,6 +81,7 @@ const postUrl = new URL(post.slug, Astro.site).href;
 				</p>
 				)
 			}
+			<hr />
 		</div>
 	</article>
 	{!post.draft && post.comments !== false && <Responses postUrl={postUrl} />}
