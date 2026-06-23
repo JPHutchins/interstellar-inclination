@@ -53,8 +53,7 @@ const hostOf = (url?: string): string => {
 						<li>
 							<a
 								href={responseLink(r)}
-								rel="nofollow ugc noopener"
-								target="_blank"
+								rel="nofollow ugc"
 								aria-label={label}
 								title={label}
 							>
@@ -84,8 +83,7 @@ const hostOf = (url?: string): string => {
 							<a
 								class="webmention-author"
 								href={responseLink(reply)}
-								rel="nofollow ugc noopener"
-								target="_blank"
+								rel="nofollow ugc"
 							>
 								<img
 									src={reply.author?.photo || fallbackAvatar}
@@ -108,8 +106,7 @@ const hostOf = (url?: string): string => {
 								<a
 									class="webmention-source"
 									href={responseLink(reply)}
-									rel="nofollow ugc noopener"
-									target="_blank"
+									rel="nofollow ugc"
 								>
 									via {hostOf(responseLink(reply))}
 								</a>
@@ -124,20 +121,18 @@ const hostOf = (url?: string): string => {
 	{
 		blueskyThread ? (
 			<p class="webmentions-discuss">
-				<a href={blueskyThread} rel="noopener" target="_blank">
-					Discuss this post on Bluesky →
-				</a>
+				<a href={blueskyThread}>Discuss this post on Bluesky →</a>
 			</p>
 		) : null
 	}
 
 	<p class="webmentions-cta">
 		To join in, reply from your own account to
-		<a href={commentsConfig.fediverseProfileUrl} rel="noopener" target="_blank">
+		<a href={commentsConfig.fediverseProfileUrl}>
 			<code>{commentsConfig.fediverseHandle}</code>
 		</a>
 		on the fediverse, or
-		<a href={commentsConfig.blueskyProfileUrl} rel="noopener" target="_blank">
+		<a href={commentsConfig.blueskyProfileUrl}>
 			<code>{commentsConfig.blueskyHandle}</code>
 		</a>
 		on Bluesky.

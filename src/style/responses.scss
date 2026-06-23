@@ -1,6 +1,21 @@
 .responses {
 	margin-top: 3rem;
 	margin-bottom: 3rem;
+	// The post body (.content) reads at 1.2rem; the Responses section lives
+	// outside .content, so match it here and let comments inherit — a reply
+	// should never read smaller than the post it answers.
+	font-size: 1.2rem;
+}
+
+// Links here are outside .content too; give them the site's link tokens at a
+// low specificity so component classes below still override where intended.
+:where(.responses) a {
+	color: var(--text-color-link);
+
+	&:hover,
+	&:focus {
+		color: var(--text-color-link-hover);
+	}
 }
 
 .responses-title {
@@ -153,30 +168,6 @@
 
 .webmentions-discuss {
 	margin-top: 1.25rem;
-
-	a {
-		display: inline-block;
-		padding: 0.4rem 0.9rem;
-		border: 1px solid var(--accent-color);
-		border-radius: 6px;
-		color: var(--accent-color);
-		font-weight: 600;
-		text-decoration: none;
-
-		&:hover {
-			background-color: var(--accent-color);
-			color: var(--background-color);
-		}
-
-		&:focus-visible {
-			outline: 2px solid var(--accent-color);
-			outline-offset: 2px;
-		}
-	}
-}
-
-.webmentions-discuss + .webmentions-cta {
-	margin-top: 0.75rem;
 }
 
 .webmentions-cta {
