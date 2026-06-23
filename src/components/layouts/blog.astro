@@ -3,9 +3,10 @@ import "../../style/style.scss";
 import Top from "@components/Top";
 import Bottom from "@components/Bottom";
 import { commentsConfig, webmentionEndpoint, pingbackEndpoint } from "@data/comments-config";
-const { title, description } = Astro.props;
+const { title, description, image, type = "website" } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const metaDescription = description?.replace(/\s+/g, " ").trim();
+const ogImage = new URL(image ?? "/crumpledpaper_500x500.png", Astro.site).href;
 ---
 
 <html lang="en">
@@ -15,6 +16,16 @@ const metaDescription = description?.replace(/\s+/g, " ").trim();
 		<title>{title}</title>
 		<link rel="canonical" href={canonical} />
 		{metaDescription && <meta name="description" content={metaDescription} />}
+		<meta property="og:site_name" content="Crumpled Paper" />
+		<meta property="og:type" content={type} />
+		<meta property="og:title" content={title} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+		{metaDescription && <meta property="og:description" content={metaDescription} />}
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:image" content={ogImage} />
+		{metaDescription && <meta name="twitter:description" content={metaDescription} />}
 		<link rel="sitemap" href="/sitemap-index.xml" />
 		<link
 			rel="alternate"

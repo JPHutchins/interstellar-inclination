@@ -151,6 +151,34 @@
 	color: var(--text-color-alt);
 }
 
+.webmentions-discuss {
+	margin-top: 1.25rem;
+
+	a {
+		display: inline-block;
+		padding: 0.4rem 0.9rem;
+		border: 1px solid var(--accent-color);
+		border-radius: 6px;
+		color: var(--accent-color);
+		font-weight: 600;
+		text-decoration: none;
+
+		&:hover {
+			background-color: var(--accent-color);
+			color: var(--background-color);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--accent-color);
+			outline-offset: 2px;
+		}
+	}
+}
+
+.webmentions-discuss + .webmentions-cta {
+	margin-top: 0.75rem;
+}
+
 .webmentions-cta {
 	margin-top: 1.25rem;
 	color: var(--text-color-alt);

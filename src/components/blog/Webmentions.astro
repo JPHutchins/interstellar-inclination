@@ -7,6 +7,7 @@ import {
 	responseLink,
 } from "src/utils/webmentions";
 import { sanitizeWebmentionHtml } from "src/utils/sanitize-webmention";
+import { blueskyUrlFor } from "src/utils/bluesky-links";
 import { commentsConfig } from "@data/comments-config";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 
 const { postUrl } = Astro.props;
 const { replies, likes, reposts, count } = responsesFor(postUrl);
+const blueskyThread = blueskyUrlFor(postUrl);
 
 const fallbackAvatar = "/crumpledpaper_100x100.png";
 const reactions = [...reposts, ...likes];
@@ -92,9 +94,7 @@ const hostOf = (url?: string): string => {
 									width="40"
 									height="40"
 								/>
-								<span class="webmention-author-name">
-									{authorName(reply)}
-								</span>
+								<span class="webmention-author-name">{authorName(reply)}</span>
 							</a>
 							{html ? (
 								<div
@@ -118,6 +118,16 @@ const hostOf = (url?: string): string => {
 					);
 				})}
 			</ol>
+		) : null
+	}
+
+	{
+		blueskyThread ? (
+			<p class="webmentions-discuss">
+				<a href={blueskyThread} rel="noopener" target="_blank">
+					Discuss this post on Bluesky →
+				</a>
+			</p>
 		) : null
 	}
 

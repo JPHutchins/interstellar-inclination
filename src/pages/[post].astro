@@ -25,7 +25,7 @@ const year = new Intl.DateTimeFormat("en-US", {
 const postUrl = new URL(post.slug, Astro.site).href;
 ---
 
-<Blog title={post.title} description={post.preview}>
+<Blog title={post.title} description={post.preview} image={post.icon} type="article">
 	<article class="h-entry">
 		<a class="u-url" href={postUrl} hidden>{post.title}</a>
 		<a class="p-author h-card" href="/" hidden>{post.author}</a>
