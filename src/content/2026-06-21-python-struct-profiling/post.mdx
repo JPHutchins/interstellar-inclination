@@ -295,11 +295,11 @@ For my purposes, I can draw a few conclusions from this.
 
 Here lives more stuff that wasn't directly relevant to my goal of assessing startup time, but is still fun.
 
-## Instance Cost
+### Instance Cost
 
 What can I say, since the benchmark suite was setup, I couldn't resist. The instance costs are relevant to the program speed once it's begun, and you'll see that they are quite a bit tighter than the module and type cost comparisons. There's a total spread of under 4x, from ~60ns up to ~220ns per instance.
 
-### Construction
+#### Construction
 
 <Plotly
 	{...charts.instCost}
@@ -313,7 +313,7 @@ What can I say, since the benchmark suite was setup, I couldn't resist. The inst
 	caption="Per-instance construction cost — each cell is × the baseline row (NamedTuple by default; click any row to re-base). Lower is faster. Click a column header to sort."
 />
 
-### Memory
+#### Memory
 
 Memory is driven by object layout. Freezing a type never changes its footprint —
 `frozen=True` only changes the write path, not the storage. mypyc trades a few
@@ -332,7 +332,7 @@ speed,[^2] and gives every compiled class a fixed layout even without `__slots__
 
 
 
-### The cost of immutability
+#### The cost of immutability
 
 Immutability sometimes costs time or space and is never more efficient.
 
