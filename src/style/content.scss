@@ -80,6 +80,7 @@
 
 	a {
 		color: var(--text-color-link);
+		overflow-wrap: break-word;
 
 		&:hover,
 		&:focus {
