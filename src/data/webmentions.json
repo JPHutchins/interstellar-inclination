@@ -1,5 +1,5 @@
 {
-	"lastWmId": 2004108,
+	"lastWmId": 2006922,
 	"webmentions": [
 		{
 			"author": {
@@ -22,6 +22,29 @@
 			"wm-received": "2026-06-21T23:55:21Z",
 			"wm-source": "https://bsky.brid.gy/convert/web/at://did:plc:q7gyjsuys6wdpvc5paqpwao3/app.bsky.feed.post/3motl2zaqpc2f%23bridgy-fed-create-2026-06-21T23:55:18.762184+00:00",
 			"wm-target": "https://www.crumpledpaper.tech/2026-06-21-hello-fediverse"
+		},
+		{
+			"author": {
+				"name": "JP Hutchins",
+				"photo": "https://avatars.webmention.io/files.mastodon.social/cd1b489720c4d3e6e4a17e0958ab005fff6a7f250d425be4a3a7d12302aa1a02.png",
+				"type": "card",
+				"url": "https://mastodon.social/@jphutchins"
+			},
+			"content": {
+				"html": "<p><span class=\"h-card\"><a href=\"https://web.brid.gy/r/https://crumpledpaper.tech/\" class=\"u-url\">@<span>crumpledpaper.tech</span></a></span> hello from mastodon</p>\n<a class=\"u-mention\" href=\"https://crumpledpaper.tech/\"></a>",
+				"text": "@crumpledpaper.tech hello from mastodon"
+			},
+			"in-reply-to": "https://www.crumpledpaper.tech/2026-06-21-hello-fediverse/",
+			"published": "2026-07-06T04:39:18+00:00",
+			"type": "entry",
+			"url": "https://mastodon.social/@jphutchins/116871184939308983",
+			"wm-id": 2006922,
+			"wm-private": false,
+			"wm-property": "in-reply-to",
+			"wm-protocol": "webmention",
+			"wm-received": "2026-07-06T04:39:21Z",
+			"wm-source": "https://ap.brid.gy/convert/web/https://mastodon.social/ap/users/116792047512016084/statuses/116871184939308983/activity",
+			"wm-target": "https://www.crumpledpaper.tech/2026-06-21-hello-fediverse/"
 		}
 	]
 }
