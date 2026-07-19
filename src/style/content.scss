@@ -103,20 +103,32 @@
 		height: auto;
 	}
 
-	li {
-		p {
-			margin: 0;
-			margin-bottom: 0.25rem;
-		}
-	}
-
 	ol,
 	ul {
 		margin-bottom: 40px;
 
+		& {
+			@media (max-width: 1024px) {
+				padding-left: 1em;
+			}
+		}
+
 		ul,
 		ol {
 			margin-bottom: 0;
+
+			& {
+				@media (max-width: 1024px) {
+					padding-left: 1em;
+				}
+			}
+		}
+	}
+
+	li {
+		p {
+			margin: 0;
+			margin-bottom: 0.25rem;
 		}
 	}
 
