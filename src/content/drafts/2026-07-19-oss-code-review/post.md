@@ -1,9 +1,9 @@
 ---
-title: Would You Pay $1 for Agentic Code Review in CI/CD?
+title: Would You Pay $1 for Agentic Code Review on PRs?
 author: JP Hutchins
 date: 2026-07-19
 tags: [oss, ai, llm, github, ci-cd, "code review"]
-preview: "LLM-driven code reviews in CI/CD, both static and agentic, have become common SASS offerings, but where does that leave open source software projects? Here's an approach to regain complete control of the harness, models, and cost."
+preview: "LLM-driven code reviews in CI/CD have become common SASS offerings, but where does that leave open source software projects? Here's an approach to regain complete control of the harness, models, and cost."
 ---	
 
 It might surprise people that I'm investing time in LLM tooling -- "Agentic" tooling even -- because I've always been somewhat of an AI-skeptic. But, this [`code-review`](https://github.com/JPHutchins/code-review) project is not my first foray into the category; I am also working on a task runner called [`camas`](https://github.com/JPhutchins/camas) that optionally includes an MCP and skills, and indeed it was used for the development of `code-review`. In turn `camas` now benefits from `code-reviews`'s agentic review on every PR.
