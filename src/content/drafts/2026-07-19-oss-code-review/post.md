@@ -1,12 +1,14 @@
 ---
 title: Would You Pay $1 for Agentic Code Review in CI/CD?
 author: JP Hutchins
-date: 2026-07-18
+date: 2026-07-19
 tags: [oss, ai, llm, github, ci-cd, "code review"]
 preview: "LLM-driven code reviews in CI/CD, both static and agentic, have become common SASS offerings, but where does that leave open source software projects? Here's an approach to regain complete control of the harness, models, and cost."
 ---	
 
-I am not excited by the prospect of "AI agents" replacing engineers, or any job, really. I can only speak for my experience as a software engineer -- the frontier models like Fable 5 are particularly well-suited for writing software, and on their own, _I don't think they're that good at it_. But I'm not sticking my head in the sand either. My experience is that LLMs, when bounded by expert judgement and deterministic bounds, provide an incredible, [albeit hard to quantify](https://sloanreview.mit.edu/article/three-approaches-to-measuring-and-managing-ai-roi/), boost to the pace of development and testing. One category where I'm very happy with their utility is code review, particularly _agentic code review_.
+It might surprise people that I'm investing time in LLM tooling -- "Agentic" tooling even -- because I've always been somewhat of an AI-skeptic. But, this [`code-review`](https://github.com/JPHutchins/code-review) project is not my first foray into the category; I am also working on a task runner called [`camas`](https://github.com/JPhutchins/camas) that optionally includes an MCP and skills, and indeed it was used for the development of `code-review`. In turn `camas` now benefits from `code-reviews`'s agentic review on every PR.
+
+Perhaps I am more of an "AI-industry" skeptic, or wary of hype and fear-mongering, than I am skeptical of LLMs themselves. I am not convinced that "AI agents" can replace engineers, or any occupation, really. I can only speak for my experience as a software engineer -- the frontier models like Opus and Fable 5 are particularly well-suited for writing software, and on their own, _I don't think they're that good at it_. But I'm not sticking my head in the sand either. My experience is that LLMs, when bounded by expert judgement and deterministic checks, provide an incredible, [albeit hard to quantify](https://sloanreview.mit.edu/article/three-approaches-to-measuring-and-managing-ai-roi/), boost to the pace of development and testing. One category where I'm very happy with their utility is code review, particularly _agentic code review_.
 
 Lately, I've started to dread what a post-AI-bubble or post-token-subsidy world would look like. Will models that provide affordable inference survive? How will Open Source Software (OSS) projects benefit from LLMs if contributors are no longer able to use subsidized flat-rate plans?
 
@@ -16,7 +18,7 @@ Some definitions are in order since "agentic" is a bit of a buzz word.
 
 ### Peer Code Review
 
-Let's relate everything back to what code review means to you. In order to review the code, you must first _read_ the code -- additions and removals -- and you may choose to also _interact_ with the code. Interacting with the code would require copying (pulling) the changes to your local development and then fiddling with it interactively: running the test suite, running the library or application, modifying code as you do so, and in my line of work -- something that an LLM agent cannot do -- flashing firmware to a physical device and interacting with it. The process uses aspects engineering, design, quality assurance (QA), testing, and writing.
+Let's relate everything back to what code review means to you. In order to review the code, you must first _read_ the code -- additions and removals -- and you may choose to also _interact_ with the code. Interacting with the code would require copying (pulling) the changes to your local development environment and then fiddling with it: running the test suite, running the library or application, modifying code as you do so, and in my line of work -- something that an LLM agent cannot do -- flashing firmware to a physical device and interacting with it. The process uses aspects of engineering, design, quality assurance (QA), testing, and writing.
 
 The kind of review that is _read-only_ -- an audit of changes -- is like a **"Static LLM Code Review"**. A review that interacts with -- or even modifies -- the code is like an **"Agentic LLM Code Review"**.
 
@@ -24,7 +26,7 @@ The kind of review that is _read-only_ -- an audit of changes -- is like a **"St
 
 This is a relatively cheap approach to automated code review because it only _reads_. It's also easy to implement: just pipe your `git diff` into an API chat prompt and ask for a review. There are many examples of ready made GitHub Actions to do this and it's simple enough that you can do it yourself (something that will be a theme in this post.)
 
-Some may claim that this is agentic because the chatbot _could_ do things like make web searches to validate claims. Nonsense. This is just another aspect of a standard read-only code review.
+Some may claim that this is agentic because the chatbot _could_ do things like make web searches to validate claims. Nonsense: those are other aspects of a standard read-only code review.
 
 Still others might call an LLM doing this sort of review "static analysis", to which I disagree fervently. Static analysis is something that software engineers are already familiar with and it is a _deterministic_ routine to assess some qualities of the software. LLMs are _stochastic_ not deterministic so they cannot perform what we traditionally consider static analysis...
 
@@ -73,7 +75,7 @@ Basically I _wanted_ this thing, and in the era of practically free inference on
 
 _Wait, no, don't leave!_
 
-Because there is not a precedent for agentic code review on public repos, not to mention implementation of granular time and cost constraints, I decided that the first step was to produce a Minimum Viable Product (MVP) and set it loose in the wild.
+Because there is not a precedent for agentic code review on public repos, not to mention implementation of granular time and cost constraints, I decided that the first step was to produce a Minimum Viable Product (MVP) and set it loose in the wild. If I had worked on it without LLM assistance, I'd still be drafting the spec and validating GitHub Actions security boundaries instead of publishing a write up.
 
 ## [code-review](https://github.com/JPHutchins/code-review)
 
@@ -96,10 +98,13 @@ Because there is not a precedent for agentic code review on public repos, not to
   - change the models
   - change the prompts
   - change the supporting tooling
+  - change the provided context (feed it the CI test reports, for example)
 - **Incremental re-reviews**: the system reads previous review JSONs to jump-start the review context
 - **Traceability -- the entire review transcript is uploaded**
 
-All of that is accomplished with the [`code-review` helper tool](https://github.com/JPHutchins/code-review/tree/main/src) -- calling 5K lines of TS with 10K lines of supporting tests a _helper_ might mean I'm finally vibe-pilled 🤦‍♀️ -- [markdown templates](https://github.com/JPHutchins/code-review/tree/main/templates), and the reference [review-reusable.yaml](https://github.com/JPHutchins/code-review/blob/main/.github/workflows/review-reusable.yaml).
+All of that is accomplished with [markdown templates](https://github.com/JPHutchins/code-review/tree/main/templates), and the reference [review-reusable.yaml](https://github.com/JPHutchins/code-review/blob/main/.github/workflows/review-reusable.yaml), and the [`code-review` helper tool](https://github.com/JPHutchins/code-review/tree/main/src).
+
+> _Calling 5K lines of TS with 10K lines of supporting tests a **"helper"** might mean I'm finally vibe-pilled_ 🤦‍♀️.
 
 ### You Can Try it Now
 
@@ -192,9 +197,11 @@ All of that is accomplished with the [`code-review` helper tool](https://github.
 
 ### The spec
 
-So that's the reference implementation that anyone can try out today, but the core of the repository is the idea, characterized in this [spec.md](https://github.com/JPHutchins/code-review/blob/main/SPEC.md) document. I hope that this proof-of-concept inspires others to work in this category. And of course contribution to [code-review](https://github.com/JPHutchins/code-review) is welcome! I don't know how the market-side could work, but personally I would share my open source projects as training data in exchange for reduced token rates for these kinds of tools.
+So that's the reference implementation that anyone can try out today, but the core of the repository is the idea itself, characterized in this [spec.md](https://github.com/JPHutchins/code-review/blob/main/SPEC.md) document. I hope that this proof-of-concept inspires others to work in this category. And of course contribution to [code-review](https://github.com/JPHutchins/code-review) is welcome!
 
-Here are some highlights of what the specification document defines and how the MVP went about demonstrating them.
+I don't know how the market-side could work, and I don't know how much inference is going to cost in the long run, but personally I would share my open source projects as training data in exchange for reduced token rates.
+
+Here are some highlights of what the specification document defines and how the MVP went about realizing them.
 
 ### GitHub Actions & Public Forks
 
@@ -224,6 +231,8 @@ I'm not pretending it's simple. It's a 700+ line YAML file and that's after abst
 The most important part of the specification is the threat model and suggestions for mitigation.
 
 #### Assets
+
+There are the assets shared with _anyone who creates a PR from a fork_.
 
 - **Model API key** — spends money; the primary target.
 - **Write credential** — can modify the repository or its conversation; the secondary target.
@@ -259,3 +268,13 @@ The most important part of the specification is the threat model and suggestions
 [unit42]: https://unit42.paloaltonetworks.com/github-actions-supply-chain-attack/
 [codecov]: https://about.codecov.io/security-update/
 [leastpriv]: https://csrc.nist.gov/glossary/term/least_privilege
+
+## Conclusion
+
+I will continue to use `code-review` on my own OSS projects since I've already seen it catch issues that slipped by local review and my own ("static") review. The maintenance workflow for it tends to be pretty simple to manage:
+
+- Notice a problem with a review? Point an agent to the review and ask it to create an issue, including links to the comment and run, on the `code-review` repo.
+- Assign one or more issues to an agent that will create a PR on `code-review`.
+- Instruct that agent to wait on `code-review`'s automated CI + code reviews, and iterate.
+
+Looking forward to seeing more users and bug reports, or new systems based on the threat mitigations demonstrated. Good luck!
