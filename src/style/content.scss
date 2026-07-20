@@ -44,7 +44,7 @@
 	}
 }
 
-.content {
+%content-base {
 	width: 100%;
 
 	font-family: "Libertinus Serif", serif;
@@ -345,6 +345,10 @@
 	.mermaid p {
 		color: var(--text-color);
 	}
+}
+
+.content {
+	@extend %content-base;
 }
 
 .toc {

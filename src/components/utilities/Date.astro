@@ -2,14 +2,18 @@
 interface Props {
 	date: string;
 	class?: string;
+	time?: boolean;
 }
 
-const { date, class: className } = Astro.props;
+const { date, class: className, time = false } = Astro.props;
 
 const formattedDate = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 	month: "long",
 	day: "numeric",
+	...(time
+		? { hour: "numeric", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" }
+		: {}),
 }).format(globalThis.Date.parse(date));
 ---
 

@@ -5,7 +5,10 @@ import {
 	contentText,
 	authorName,
 	responseLink,
+	publishedAt,
+	fediverseThreadFor,
 } from "src/utils/webmentions";
+import Date from "@components/utilities/Date";
 import { sanitizeWebmentionHtml } from "src/utils/sanitize-webmention";
 import { blueskyUrlFor } from "src/utils/bluesky-links";
 import { commentsConfig } from "@data/comments-config";
@@ -17,6 +20,7 @@ interface Props {
 const { postUrl } = Astro.props;
 const { replies, likes, reposts, count } = responsesFor(postUrl);
 const blueskyThread = blueskyUrlFor(postUrl);
+const fediverseThread = fediverseThreadFor(postUrl);
 
 const fallbackAvatar = "/crumpledpaper_100x100.png";
 const reactions = [...reposts, ...likes];
@@ -78,43 +82,69 @@ const hostOf = (url?: string): string => {
 				{replies.map((reply) => {
 					const html = contentHtml(reply);
 					const text = contentText(reply);
+					const link = responseLink(reply);
+					const posted = publishedAt(reply);
 					return (
 						<li class="webmention">
-							<a
-								class="webmention-author"
-								href={responseLink(reply)}
-								rel="nofollow ugc"
-							>
-								<img
-									src={reply.author?.photo || fallbackAvatar}
-									alt=""
-									loading="lazy"
-									width="40"
-									height="40"
-								/>
-								<span class="webmention-author-name">{authorName(reply)}</span>
-							</a>
+							<div class="webmention-head">
+								<a class="webmention-avatar" href={link} rel="nofollow ugc" aria-label={authorName(reply)}>
+									<img
+										src={reply.author?.photo || fallbackAvatar}
+										alt=""
+										loading="lazy"
+										width="40"
+										height="40"
+									/>
+									
+								</a>
+								<span class="webmention-byline">
+									<a class="webmention-author" href={link} rel="nofollow ugc">
+										<span class="webmention-author-name">{authorName(reply)}</span>
+									</a>
+									{link || posted ? (
+										<span class="webmention-meta">
+											{posted ? (
+												<Date date={posted} time class="webmention-time" />
+											) : null}
+											{link ? (
+												<a
+													class="webmention-source"
+													href={link}
+													rel="nofollow ugc"
+												>
+													via {hostOf(link)}
+												</a>
+											) : null}
+											
+										</span>
+									) : null}
+								</span>
+							</div>
 							{html ? (
 								<div
 									class="webmention-body"
 									set:html={sanitizeWebmentionHtml(html)}
 								/>
 							) : (
-								<p class="webmention-body">{text ?? ""}</p>
+								<div class="webmention-body">
+									<p>{text ?? ""}</p>
+								</div>
 							)}
-							{responseLink(reply) ? (
-								<a
-									class="webmention-source"
-									href={responseLink(reply)}
-									rel="nofollow ugc"
-								>
-									via {hostOf(responseLink(reply))}
-								</a>
-							) : null}
+							
 						</li>
 					);
 				})}
 			</ol>
+		) : null
+	}
+
+	{
+		fediverseThread ? (
+			<p class="webmentions-discuss">
+				<a href={fediverseThread} rel="nofollow ugc">
+					Discuss this post on the fediverse →
+				</a>
+			</p>
 		) : null
 	}
 
@@ -138,3 +168,19 @@ const hostOf = (url?: string): string => {
 		on Bluesky.
 	</p>
 </section>
+
+<script>
+	const format = new Intl.DateTimeFormat(undefined, {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+		hour: "numeric",
+		minute: "2-digit",
+		timeZoneName: "short",
+	});
+
+	for (const el of document.querySelectorAll<HTMLTimeElement>(".webmention-time")) {
+		const parsed = new Date(el.dateTime);
+		if (!Number.isNaN(parsed.valueOf())) el.textContent = format.format(parsed);
+	}
+</script>

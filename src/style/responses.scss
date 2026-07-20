@@ -1,34 +1,14 @@
+@use "content";
+
 .responses {
-	margin-top: 3rem;
 	margin-bottom: 3rem;
-	// The post body (.content) reads at 1.2rem; the Responses section lives
-	// outside .content, so match it here and let comments inherit — a reply
-	// should never read smaller than the post it answers.
-	font-size: 1.2rem;
-}
 
-// Links here are outside .content too; give them the site's link tokens at a
-// low specificity so component classes below still override where intended.
-:where(.responses) a {
-	color: var(--text-color-link);
-
-	&:hover,
-	&:focus {
-		color: var(--text-color-link-hover);
-	}
+	@extend %content-base;
 }
 
 .responses-title {
 	font-size: 1.6rem;
 	margin-bottom: 0.25rem;
-}
-
-.responses-disclaimer {
-	color: var(--text-color-alt);
-	font-size: 0.9rem;
-	border-left: 3px solid var(--turquoise);
-	padding-left: 0.75rem;
-	margin: 0.5rem 0 1.25rem;
 }
 
 .responses-details {
@@ -94,7 +74,6 @@
 
 .responses-channel-title,
 .webmentions-title {
-	font-size: 1.2rem;
 	margin-bottom: 0.75rem;
 	padding-bottom: 0.25rem;
 	border-bottom: 2px solid var(--turquoise);
@@ -104,7 +83,7 @@
 	color: var(--text-color-alt);
 }
 
-.facepile {
+ul.facepile {
 	list-style: none;
 	padding: 0;
 	margin: 0 0 1.25rem;
@@ -121,49 +100,90 @@
 	}
 }
 
-.webmention-list {
+ol.webmention-list {
 	list-style: none;
 	padding: 0;
 	margin: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 1.25rem;
+
+	@media (max-width: 1024px) {
+		padding: 0;
+		margin-left: -0.75rem;
+		margin-right: -0.75rem;
+	}
 }
 
 .webmention {
 	background: var(--background-color-aside);
-	padding: 1rem 1.25rem;
+	padding: 0.75rem 0.75rem;
+	border-left: 3px solid var(--turquoise);
 }
 
-.webmention-author {
-	display: inline-flex;
+.webmention-head {
+	display: flex;
 	align-items: center;
-	gap: 0.5rem;
-	font-weight: bold;
-	text-decoration: none;
-	color: var(--text-color);
+	gap: 0.75rem;
+}
+
+a.webmention-avatar {
+	flex-shrink: 0;
+	line-height: 0;
 
 	img {
 		width: 40px;
 		height: 40px;
 		border-radius: 50%;
 		object-fit: cover;
+		display: block;
 	}
+}
+
+.webmention-byline {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.1rem;
+	min-width: 0;
+}
+
+a.webmention-author {
+	font-weight: bold;
+	text-decoration: none;
+	color: var(--text-color);
+	font-family: "system-ui", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .webmention-body {
 	margin: 0.6rem 0 0;
+
+	> :first-child {
+		margin-top: 0;
+	}
 
 	> :last-child {
 		margin-bottom: 0;
 	}
 }
 
-.webmention-source {
-	display: inline-block;
-	margin-top: 0.5rem;
+.webmention-meta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.5rem;
 	font-size: 0.8rem;
 	color: var(--text-color-alt);
+	font-family: "system-ui", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+a.webmention-source {
+	color: var(--text-color-alt);
+
+	&:hover,
+	&:focus {
+		color: var(--text-color-link-hover);
+	}
 }
 
 .webmentions-discuss {
@@ -173,7 +193,6 @@
 .webmentions-cta {
 	margin-top: 1.25rem;
 	color: var(--text-color-alt);
-	font-size: 0.9rem;
 }
 
 .giscus-unconfigured {

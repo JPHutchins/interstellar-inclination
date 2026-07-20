@@ -88,19 +88,34 @@ export const contentHtml = (entry: WebmentionEntry): string | undefined =>
 export const contentText = (entry: WebmentionEntry): string | undefined =>
 	typeof entry.content === "string" ? undefined : entry.content?.text;
 
-const networkOf = (entry: WebmentionEntry): string | null => {
+type Network = "bluesky" | "fediverse";
+
+const networkLabel: Readonly<Record<Network, string>> = {
+	bluesky: "Bluesky",
+	fediverse: "the fediverse",
+};
+
+const networkOf = (entry: WebmentionEntry): Network | null => {
 	const haystack = `${entry["wm-source"] ?? ""} ${entry.url ?? ""}`;
-	if (/bsky|bluesky/i.test(haystack)) return "Bluesky";
-	if (/brid\.gy/i.test(haystack)) return "the fediverse";
+	if (/bsky|bluesky/i.test(haystack)) return "bluesky";
+	if (/brid\.gy/i.test(haystack)) return "fediverse";
 	return null;
 };
 
 export const authorName = (entry: WebmentionEntry): string => {
 	const name = entry.author?.name?.trim();
 	if (name) return name;
-	const where = networkOf(entry);
-	return where ? `Someone on ${where}` : "Someone";
+	const net = networkOf(entry);
+	return net ? `Someone on ${networkLabel[net]}` : "Someone";
 };
 
 export const responseLink = (entry: WebmentionEntry): string | undefined =>
 	entry.author?.url?.trim() || entry.url || entry["wm-source"];
+
+export const publishedAt = (entry: WebmentionEntry): string | undefined =>
+	entry.published?.trim() || entry["wm-received"];
+
+export const fediverseThreadFor = (postUrl: string): string | undefined => {
+	const reply = responsesFor(postUrl).replies.find((e) => networkOf(e) === "fediverse");
+	return reply?.url ?? reply?.["wm-source"];
+};
