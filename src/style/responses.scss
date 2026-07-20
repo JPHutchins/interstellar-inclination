@@ -115,6 +115,13 @@ ol.webmention-list {
 	}
 }
 
+// These are flex UI lists, not prose — opt their items out of the
+// %content-base `li + li` rhythm so avatars/comments don't get nudged.
+ul.facepile li,
+ol.webmention-list li {
+	margin-top: 0;
+}
+
 .webmention {
 	background: var(--background-color-aside);
 	padding: 0.75rem 0.75rem;

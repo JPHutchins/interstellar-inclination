@@ -11,9 +11,8 @@ const formattedDate = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
 	month: "long",
 	day: "numeric",
-	...(time
-		? { hour: "numeric", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" }
-		: {}),
+	timeZone: "UTC",
+	...(time ? { hour: "numeric", minute: "2-digit", timeZoneName: "short" } : {}),
 }).format(globalThis.Date.parse(date));
 ---
 

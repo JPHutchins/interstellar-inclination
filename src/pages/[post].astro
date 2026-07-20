@@ -21,6 +21,7 @@ export const getStaticPaths = (async () => {
 const { post } = Astro.props;
 const year = new Intl.DateTimeFormat("en-US", {
 	year: "numeric",
+	timeZone: "UTC",
 }).format(globalThis.Date.parse(post.date));
 const postUrl = new URL(post.slug, Astro.site).href;
 ---

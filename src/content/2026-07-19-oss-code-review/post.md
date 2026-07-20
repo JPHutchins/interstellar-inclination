@@ -102,7 +102,7 @@ Because there is not a precedent for agentic code review on public repos, not to
 - **Incremental re-reviews**: the system reads previous review JSONs to jump-start the review context
 - **Traceability -- the entire review transcript is uploaded**
 
-All of that is accomplished with [markdown templates](https://github.com/JPHutchins/code-review/tree/main/templates), and the reference [review-reusable.yaml](https://github.com/JPHutchins/code-review/blob/main/.github/workflows/review-reusable.yaml), and the [`code-review` helper tool](https://github.com/JPHutchins/code-review/tree/main/src).
+All of that is accomplished with [markdown templates](https://github.com/JPHutchins/code-review/tree/main/templates), the reference [review-reusable.yaml](https://github.com/JPHutchins/code-review/blob/main/.github/workflows/review-reusable.yaml), and the [`code-review` helper tool](https://github.com/JPHutchins/code-review/tree/main/src).
 
 > _Calling 5K lines of TS with 10K lines of supporting tests a **"helper"** might mean I'm finally vibe-pilled_ 🤦‍♀️.
 
